@@ -83,3 +83,9 @@ psql postgres
 \du
 \q
 ```
+
+### tmux
+
+```sh
+brew install tmux
+ln -s ~/.dotfiles/.tmux.conf ~/.tmux.conf
