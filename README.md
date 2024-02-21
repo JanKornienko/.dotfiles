@@ -58,7 +58,6 @@ brew install --cask cheatsheet
 brew install --cask vlc
 brew install --cask hiddenbar
 brew install --cask maccy
-brew install neovim
 brew install node@20
 brew install yarn
 ```
@@ -67,6 +66,7 @@ brew install yarn
 - [Revolut - Mobile Finance](https://apps.apple.com/cz/app/revolut-mobile-finance/id932493382)
 - [HBO Max: Stream TV & Movies](https://apps.apple.com/cz/app/hbo-max-stream-tv-movies/id971265422)
 - [AdGuard for Safari](https://apps.apple.com/cz/app/adguard-for-safari/id1440147259?mt=12)
+- [ColorSlurp](https://apps.apple.com/cz/app/colorslurp/id1287239339)
 
 ### PostgreSQL
 
@@ -89,3 +89,18 @@ psql postgres
 ```sh
 brew install tmux
 ln -s ~/.dotfiles/.tmux.conf ~/.tmux.conf
+```
+
+### Neovim
+
+```sh
+brew install neovim
+mkdir ~/.config/nvim
+ln -s ~/.dotfiles/.config/nvim ~/.config/nvim
+```
+
+#### Plugins
+
+- [lazy.nvim](https://github.com/folke/lazy.nvim)
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
