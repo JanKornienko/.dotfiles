@@ -79,6 +79,8 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git yarn brew git-prompt zsh-autosuggestions zsh-syntax-highlighting you-should-use zsh-bat web-search copypath common-aliases copyfile dirhistory macos npm command-not-found colored-man-pages)
 
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=60"
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration

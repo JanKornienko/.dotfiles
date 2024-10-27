@@ -44,7 +44,6 @@ brew install --cask spotify
 brew install --cask messenger
 brew install --cask discord
 brew install --cask figma
-brew install --cask notion
 brew install --cask onyx
 brew install --cask microsoft-teams
 brew install --cask microsoft-word
@@ -63,10 +62,9 @@ brew install yarn
 ```
 
 - [HiCoffee - Caffeine Tracker](https://apps.apple.com/cz/app/hicoffee-caffeine-tracker/id1507361706)
-- [Revolut - Mobile Finance](https://apps.apple.com/cz/app/revolut-mobile-finance/id932493382)
-- [HBO Max: Stream TV & Movies](https://apps.apple.com/cz/app/hbo-max-stream-tv-movies/id971265422)
 - [AdGuard for Safari](https://apps.apple.com/cz/app/adguard-for-safari/id1440147259?mt=12)
 - [ColorSlurp](https://apps.apple.com/cz/app/colorslurp/id1287239339)
+- [Dropover - Easier Drag & Drop](https://apps.apple.com/cz/app/dropover-easier-drag-drop/id1355679052?mt=12)
 
 ### PostgreSQL
 
