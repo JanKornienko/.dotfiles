@@ -1,3 +1,8 @@
+# Automatically start tmux if not already inside a tmux session
+if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
+    tmux attach-session -t default || tmux new-session -s default
+fi
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -32,6 +37,7 @@ plugins=(
 	git-prompt        				# Adds Git status info to prompt
 	macos             				# Adds macOS-specific functions and aliases
 	sudo              				# Press ESC twice to add sudo to current command
+	tmux											# Provides aliases for tmux, the terminal multiplexer
 	web-search        				# Adds aliases for searching the web from terminal
 	yarn              				# Adds completion and aliases for Yarn
 	you-should-use    				# Reminds you of existing aliases

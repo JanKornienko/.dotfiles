@@ -32,6 +32,7 @@ git clone https://github.com/fdellwing/zsh-bat.git $ZSH_CUSTOM/plugins/zsh-bat
 ```
 
 ### Other
+
 ```sh
 brew install --cask iterm2
 brew install --cask brave-browser
@@ -84,9 +85,12 @@ psql postgres
 
 ### tmux
 
+- install TPM (Tmux Plugin Manager)
+
 ```sh
 brew install tmux
 ln -s ~/.dotfiles/.tmux.conf ~/.tmux.conf
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ```
 
 ### Neovim
