@@ -56,6 +56,8 @@ source $ZSH/oh-my-zsh.sh
 
 export PATH="/opt/homebrew/opt/node@20/bin:$PATH"
 
+eval "$(zoxide init zsh)"
+
 # Aliases
 alias vim="nvim"
 alias	la="ls -a"
