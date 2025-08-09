@@ -1,6 +1,6 @@
--- ==========
--- STATUS LINE
--- ==========
+-- =======
+-- LUALINE
+-- =======
 
 return {
   "nvim-lualine/lualine.nvim",
@@ -69,4 +69,4 @@ return {
       extensions = { "nvim-tree", "lazy" },
     })
   end,
-} 
+}

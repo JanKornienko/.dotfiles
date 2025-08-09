@@ -1,8 +1,3 @@
-# Automatically start tmux if not already inside a tmux session
-# if command -v tmux &> /dev/null && [ -z "$TMUX" ]; then
-#    tmux attach-session -t default || tmux new-session -s default
-# fi
-
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -54,15 +49,20 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-export PATH="/opt/homebrew/opt/node@20/bin:$PATH"
-
-eval "$(zoxide init zsh)"
-
 # Aliases
 alias vim="nvim"
 alias	la="ls -a"
 alias	lla="ls -la"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)
+
+# FZF Tmux Integration
+# Use tmux popup for fzf when inside tmux
+if [[ -n "$TMUX" ]]; then
+  export FZF_TMUX_OPTS="-p 80%,80%"
+  export FZF_TMUX=1
+fi
+
+# FZF configuration for tmux
+export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --border --margin=1,4"

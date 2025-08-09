@@ -28,6 +28,7 @@ opt.termguicolors = true -- Enable true color support
 opt.background = "dark" -- Set dark background
 opt.signcolumn = "yes" -- Always show signcolumn
 opt.cursorline = true -- Highlight current line
+opt.showmode = false -- Don't show mode in command line (shown in statusline)
 
 -- Backspace
 opt.backspace = "indent,eol,start" -- Allow backspace on indent, end of line or insert mode start position
@@ -47,7 +48,6 @@ opt.sidescrolloff = 8 -- Keep 8 columns left/right of cursor
 
 -- Performance
 opt.updatetime = 250 -- Faster completion
-opt.timeoutlen = 300 -- Faster key sequence completion
 
--- Command line
-opt.showmode = false -- Don't show mode in command line (shown in statusline)
+-- Clipboard
+opt.clipboard = "unnamedplus" -- Use system clipboard for all yank, delete, change and put operations
