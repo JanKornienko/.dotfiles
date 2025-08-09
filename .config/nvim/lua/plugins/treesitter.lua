@@ -24,7 +24,6 @@ return {
         "bash",
         "html",
         "css",
-        "go",
         "rust",
       },
       
