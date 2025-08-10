@@ -25,10 +25,11 @@ opt.incsearch = true -- Show search results as you type
 
 -- Appearance
 opt.termguicolors = true -- Enable true color support
-opt.background = "dark" -- Set dark background
 opt.signcolumn = "yes" -- Always show signcolumn
 opt.cursorline = true -- Highlight current line
 opt.showmode = false -- Don't show mode in command line (shown in statusline)
+opt.background = "dark" -- or "light" for light mode
+vim.cmd([[colorscheme gruvbox]])
 
 -- Backspace
 opt.backspace = "indent,eol,start" -- Allow backspace on indent, end of line or insert mode start position
@@ -51,3 +52,6 @@ opt.updatetime = 250 -- Faster completion
 
 -- Clipboard
 opt.clipboard = "unnamedplus" -- Use system clipboard for all yank, delete, change and put operations
+
+-- Prettier
+vim.g.lazyvim_prettier_needs_config = false

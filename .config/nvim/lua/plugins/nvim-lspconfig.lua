@@ -41,6 +41,7 @@ return {
         "html",
         "cssls",
         "bashls",
+        "eslint",
       },
       automatic_installation = true,
     })
@@ -118,16 +119,29 @@ return {
       capabilities = capabilities,
     })
 
+    -- ESLint LSP
+    lspconfig.eslint.setup({
+      capabilities = capabilities,
+    })
+
     -- Global LSP keymaps
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("UserLspConfig", {}),
       callback = function(ev)
         local opts = { buffer = ev.buf }
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
         vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
         vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
         vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
         vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+        
+        -- Disable LSP formatting for null-ls to handle
+        if client and client.name ~= "null-ls" then
+          client.server_capabilities.documentFormattingProvider = false
+          client.server_capabilities.documentRangeFormattingProvider = false
+        end
       end,
     })
   end,

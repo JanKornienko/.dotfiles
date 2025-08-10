@@ -43,6 +43,145 @@ return {
           text_align = "left",
         },
       },
+      -- Gruvbox theme colors for bufferline
+      highlights = {
+        fill = {
+          fg = { attribute = "fg", highlight = "GruvboxBg2" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        background = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        tab = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        tab_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        tab_close = {
+          fg = { attribute = "fg", highlight = "GruvboxRed" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        close_button = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        close_button_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxRed" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        buffer_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+          bold = true,
+        },
+        buffer_visible = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        separator = {
+          fg = { attribute = "bg", highlight = "GruvboxBg0" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        separator_selected = {
+          fg = { attribute = "bg", highlight = "GruvboxBg0" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        separator_visible = {
+          fg = { attribute = "bg", highlight = "GruvboxBg0" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        modified = {
+          fg = { attribute = "fg", highlight = "GruvboxOrange" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        modified_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxOrange" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        modified_visible = {
+          fg = { attribute = "fg", highlight = "GruvboxOrange" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        duplicate_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+          italic = true,
+        },
+        duplicate_visible = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+          italic = true,
+        },
+        duplicate = {
+          fg = { attribute = "fg", highlight = "GruvboxFg1" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+          italic = true,
+        },
+        pick = {
+          fg = { attribute = "fg", highlight = "GruvboxBg0" },
+          bg = { attribute = "fg", highlight = "GruvboxGreen" },
+        },
+        pick_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxBg0" },
+          bg = { attribute = "fg", highlight = "GruvboxGreen" },
+        },
+        pick_visible = {
+          fg = { attribute = "fg", highlight = "GruvboxBg0" },
+          bg = { attribute = "fg", highlight = "GruvboxGreen" },
+        },
+        error = {
+          fg = { attribute = "fg", highlight = "GruvboxRed" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        error_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxRed" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        error_visible = {
+          fg = { attribute = "fg", highlight = "GruvboxRed" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        warning = {
+          fg = { attribute = "fg", highlight = "GruvboxOrange" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        warning_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxOrange" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        warning_visible = {
+          fg = { attribute = "fg", highlight = "GruvboxOrange" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        info = {
+          fg = { attribute = "fg", highlight = "GruvboxBlue" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        info_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxBlue" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        info_visible = {
+          fg = { attribute = "fg", highlight = "GruvboxBlue" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        hint = {
+          fg = { attribute = "fg", highlight = "GruvboxGray" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+        hint_selected = {
+          fg = { attribute = "fg", highlight = "GruvboxGray" },
+          bg = { attribute = "bg", highlight = "GruvboxBg0" },
+        },
+        hint_visible = {
+          fg = { attribute = "fg", highlight = "GruvboxGray" },
+          bg = { attribute = "bg", highlight = "GruvboxBg1" },
+        },
+      },
       ---@param opts bufferline.IconFetcherOpts
       get_element_icon = function(opts)
         local icon_map = {
