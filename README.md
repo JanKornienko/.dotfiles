@@ -343,6 +343,4 @@ fzf_dir_finder() {
 
 ---
 
-_Last updated: $(date)_
-
 > 💡 **Pro Tip**: These shortcuts are specifically configured for your development environment. Use `<leader>?` in Neovim to see available keymaps!
