@@ -54,6 +54,11 @@ alias vim="nvim"
 alias	la="ls -a"
 alias	lla="ls -la"
 
+# NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
 export BAT_THEME="gruvbox-dark"
 
 # FZF configuration with bat preview
@@ -98,6 +103,7 @@ bindkey '^R' fzf-history-widget
 source <(fzf --zsh)
 
 if [[ -n "$TMUX" ]]; then
-  export FZF_TMUX_OPTS="-p 50%,50%"
+  export FZF_TMUX_OPTS="-p 80%,80%"
   export FZF_TMUX=1
 fi
+

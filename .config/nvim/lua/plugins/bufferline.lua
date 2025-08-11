@@ -23,7 +23,11 @@ return {
       -- stylua: ignore
       right_mouse_command = function(n) vim.api.nvim_buf_delete(n, { force = true }) end,
       diagnostics = "nvim_lsp",
-      always_show_bufferline = false,
+      always_show_bufferline = true,
+      show_buffer_close_icons = true,
+      show_close_icon = true,
+      show_buffer_icons = true,
+      show_tab_indicators = true,
       diagnostics_indicator = function(_, _, diag)
         local icons = {
           Error = " ",
@@ -212,11 +216,24 @@ return {
   },
   config = function(_, opts)
     require("bufferline").setup(opts)
+    
+    -- Force bufferline to show
+    vim.opt.showtabline = 2
+    
     -- Fix bufferline when restoring a session
     vim.api.nvim_create_autocmd({ "BufAdd", "BufDelete" }, {
       callback = function()
         vim.schedule(function()
           pcall(require, "bufferline")
+        end)
+      end,
+    })
+    
+    -- Ensure bufferline is visible on startup
+    vim.api.nvim_create_autocmd("VimEnter", {
+      callback = function()
+        vim.schedule(function()
+          require("bufferline").refresh()
         end)
       end,
     })

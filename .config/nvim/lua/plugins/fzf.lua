@@ -22,8 +22,8 @@ return {
   config = function()
     require("fzf-lua").setup({
       winopts = {
-        height = 0.5,
-        width = 0.5,
+        height = 0.7,
+        width = 0.7,
         row = 0.5,
         col = 0.5,
         border = { "┌", "─", "┐", "│", "┘", "─", "└", "│" },
@@ -36,8 +36,8 @@ return {
         ["--height"] = "80%",
       },
       fzf_colors = {
-        pointer = { "fg", "GruvboxOrange" },
-        marker = { "fg", "GruvboxOrange" },
+        pointer = { "fg", "GruvboxRed" },
+        marker = { "fg", "GruvboxRed" },
         prompt = { "fg", "GruvboxGreen" },
         hl = { "fg", "GruvboxOrange" },
         ["hl+"] = { "fg", "GruvboxRed" },

@@ -93,10 +93,15 @@ return {
       window = {
         position = "left",
         width = 40,
+        width_resize = true,
+        auto_resize = true,
         mapping_options = {
           noremap = true,
           nowait = true,
         },
+        -- Better window management
+        close_if_last_window = false,
+        popup_border_style = "rounded",
         mappings = {
           ["<space>"] = {
             "toggle_node",
@@ -162,7 +167,7 @@ return {
           },
         },
         follow_current_file = {
-          enabled = false,
+          enabled = true,
           leave_dirs_open = false,
         },
         group_empty_dirs = false,

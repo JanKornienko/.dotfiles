@@ -24,3 +24,6 @@ vim.keymap.set("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer" })
 vim.keymap.set("n", "<leader>s", ":w<CR>", { desc = "Save file" })
 vim.keymap.set("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 vim.keymap.set("n", "<leader>sq", ":wq<CR>", { desc = "Save and quit" })
+
+-- Formatting
+vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, { desc = "Format buffer" })
