@@ -27,3 +27,6 @@ vim.keymap.set("n", "<leader>sq", ":wq<CR>", { desc = "Save and quit" })
 
 -- Formatting
 vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, { desc = "Format buffer" })
+
+vim.keymap.set("n", "<C-d>", "<C-d>zz")
+vim.keymap.set("n", "<C-u>", "<C-u>zz")
