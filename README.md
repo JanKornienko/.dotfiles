@@ -1,346 +1,174 @@
-# 🚀 Custom Keybindings from .dotfiles
+# Dotfiles
 
-A comprehensive reference for all custom shortcuts and keybindings defined in your `.dotfiles` configuration.
+My personal dotfiles configuration for macOS.
 
-## 📚 Table of Contents
+## 📋 Table of Contents
 
-- [Neovim](#neovim)
-- [Tmux](#tmux)
-- [Zsh](#zsh)
-- [FZF](#fzf)
-
----
-
-## 🎯 Neovim
-
-### Leader Key
-
-- `<Space>` - Leader key
-- `\` - Local leader key
-
-### Window Management
-
-| Shortcut     | Action   | Description               |
-| ------------ | -------- | ------------------------- |
-| `<leader>sv` | `<C-w>v` | Split window vertically   |
-| `<leader>sh` | `<C-w>s` | Split window horizontally |
-| `<leader>se` | `<C-w>=` | Make splits equal size    |
-| `<leader>sx` | `:close` | Close current split       |
-
-### Buffer Management
-
-| Shortcut     | Action       | Description     |
-| ------------ | ------------ | --------------- |
-| `<leader>bn` | `:bnext`     | Next buffer     |
-| `<leader>bp` | `:bprevious` | Previous buffer |
-| `<leader>bd` | `:bdelete`   | Delete buffer   |
-
-### File Operations
-
-| Shortcut     | Action | Description   |
-| ------------ | ------ | ------------- |
-| `<leader>s`  | `:w`   | Save file     |
-| `<leader>q`  | `:q`   | Quit          |
-| `<leader>sq` | `:wq`  | Save and quit |
-
-### Search & Navigation
-
-| Shortcut     | Action  | Description             |
-| ------------ | ------- | ----------------------- |
-| `<leader>nh` | `:nohl` | Clear search highlights |
-
-### File Explorer (Neo-tree)
-
-| Shortcut     | Action                  | Description                          |
-| ------------ | ----------------------- | ------------------------------------ |
-| `<leader>e`  | Toggle Neo-tree         | Toggle file explorer (filesystem)    |
-| `<leader>bf` | Toggle Neo-tree float   | Toggle file explorer in float window |
-| `<leader>bs` | Toggle Neo-tree sidebar | Toggle file explorer in left sidebar |
-
-#### Neo-tree Navigation
-
-| Shortcut  | Action                  |
-| --------- | ----------------------- |
-| `<space>` | Toggle node             |
-| `<cr>`    | Open file               |
-| `P`       | Toggle preview          |
-| `l`       | Focus preview           |
-| `S`       | Open split              |
-| `s`       | Open vsplit             |
-| `t`       | Open in new tab         |
-| `w`       | Open with window picker |
-| `a`       | Add file                |
-| `A`       | Add directory           |
-| `d`       | Delete                  |
-| `r`       | Rename                  |
-| `y`       | Copy to clipboard       |
-| `x`       | Cut to clipboard        |
-| `p`       | Paste from clipboard    |
-| `q`       | Close window            |
-| `R`       | Refresh                 |
-| `?`       | Show help               |
-
-#### Neo-tree Filesystem
-
-| Shortcut | Action                 |
-| -------- | ---------------------- |
-| `<bs>`   | Navigate up            |
-| `.`      | Set root               |
-| `H`      | Toggle hidden files    |
-| `/`      | Fuzzy finder           |
-| `D`      | Fuzzy finder directory |
-| `#`      | Fuzzy sorter           |
-| `f`      | Filter on submit       |
-| `<c-x>`  | Clear filter           |
-| `[g`     | Previous git modified  |
-| `]g`     | Next git modified      |
-
-### FZF Integration
-
-| Shortcut     | Action                   | Description                  |
-| ------------ | ------------------------ | ---------------------------- |
-| `<leader>ff` | Find files               | Search for files             |
-| `<leader>fg` | Live grep                | Search in files              |
-| `<leader>fb` | Find buffers             | Search buffers               |
-| `<leader>fh` | Help tags                | Search help                  |
-| `<leader>fc` | Command history          | Search command history       |
-| `<leader>fs` | Search word under cursor | Search for word under cursor |
-| `<leader>fl` | Search lines             | Search lines in buffers      |
-| `<leader>ft` | Find tabs                | Search tabs                  |
-| `<leader>fd` | Document diagnostics     | Show document diagnostics    |
-| `<leader>fw` | Workspace diagnostics    | Show workspace diagnostics   |
-
-#### FZF Actions
-
-| Shortcut | Action    |
-| -------- | --------- |
-| `<cr>`   | Edit file |
-| `ctrl-s` | Split     |
-| `ctrl-v` | Vsplit    |
-| `ctrl-t` | Tab edit  |
-
-### Which-Key
-
-| Shortcut    | Action       | Description                  |
-| ----------- | ------------ | ---------------------------- |
-| `<leader>?` | Show keymaps | Display buffer local keymaps |
+- [iTerm Color Schemes](#iterm-color-schemes)
+- [Oh My Zsh](#oh-my-zsh)
+  - [Theme](#theme)
+  - [Plugins](#plugins)
+  - [Aliases](#aliases)
+- [tmux Configuration](#tmux-configuration)
+  - [Key Bindings](#key-bindings)
+  - [Plugins](#tmux-plugins)
 
 ---
 
-## 🖥️ Tmux
+## 🎨 iTerm Color Schemes
 
-### Configuration Reload
+Available iTerm color schemes located in `iterm/`:
 
-| Shortcut    | Action             |
-| ----------- | ------------------ |
-| `<Prefix>r` | Reload tmux config |
+### Gruvbox Themes
 
-### Mouse Control
+- **GruvboxDark.itermcolors** - Gruvbox Dark theme
+- **GruvboxDarkHard.itermcolors** - Gruvbox Dark Hard variant
+- **GruvboxLight.itermcolors** - Gruvbox Light theme
+- **GruvboxLightHard.itermcolors** - Gruvbox Light Hard variant
+- **GruvboxMaterial.itermcolors** - Gruvbox Material variant
 
-- Mouse enabled for clickable windows, panes, and resizable panes
+### Kanagawa Themes
 
-### Pane Navigation
+- **KanagawaBones.itermcolors** - Kanagawa Bones variant
+- **KanagawaDragon.itermcolors** - Kanagawa Dragon variant
+- **KanagawaWave.itermcolors** - Kanagawa Wave variant
 
-| Shortcut | Action            |
-| -------- | ----------------- |
-| `h`      | Select left pane  |
-| `j`      | Select down pane  |
-| `k`      | Select up pane    |
-| `l`      | Select right pane |
+### Other Themes
 
-### Pane Splitting
+- **OneDarkProNightFlat.itermcolors** - One Dark Pro Night Flat theme
 
-| Shortcut | Action                  |
-| -------- | ----------------------- |
-| `\|`     | Split pane vertically   |
-| `-`      | Split pane horizontally |
+### Installation
 
-### Window Navigation
+1. Open iTerm2
+2. Go to `Preferences` → `Profiles` → `Colors`
+3. Click `Color Presets` → `Import...`
+4. Select the desired `.itermcolors` file from the `iterm/` directory
+5. Select the imported preset from `Color Presets`
 
-| Shortcut      | Action          |
-| ------------- | --------------- |
-| `Shift+Left`  | Previous window |
-| `Shift+Right` | Next window     |
+---
 
-### Indexing
+## 🐚 Oh My Zsh
 
-- Windows start from index 1
-- Panes start from index 1
+### Theme
+
+**Powerlevel10k** - A fast and highly customizable Zsh theme.
+
+- Repository: [romkatv/powerlevel10k](https://github.com/romkatv/powerlevel10k)
+- Configuration: Run `p10k configure` to customize the prompt
+- Config file: `~/.p10k.zsh`
 
 ### Plugins
 
-- **tpm**: Plugin manager
-- **tmux-sensible**: Sensible defaults
-- **tmux-resurrect**: Session persistence
-- **tmux-continuum**: Automatic restore
-- **tmux-yank**: Copy to clipboard
-- **vim-tmux-navigator**: Seamless navigation between vim and tmux
+The following Oh My Zsh plugins are installed. Click on any plugin name to view its source code and documentation:
 
----
+| Plugin                                                                                          | Description                                                                                 |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`aliases`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/aliases)                     | Helps list the shortcuts that are currently available based on the plugins you have enabled |
+| [`brew`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/brew)                           | Adds aliases for common Homebrew commands                                                   |
+| [`colored-man-pages`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/colored-man-pages) | Adds colors to man pages                                                                    |
+| [`command-not-found`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/command-not-found) | Suggests package installation if command not found                                          |
+| [`common-aliases`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/common-aliases)       | Provides many useful aliases and functions                                                  |
+| [`copyfile`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/copyfile)                   | Copies content of a file to clipboard                                                       |
+| [`copypath`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/copypath)                   | Copies current directory path to clipboard                                                  |
+| [`dirhistory`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/dirhistory)               | Adds keyboard shortcuts for directory navigation                                            |
+| [`git`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git)                             | Provides aliases and functions for Git                                                      |
+| [`git-prompt`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git-prompt)               | Adds Git status info to prompt                                                              |
+| [`macos`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/macos)                         | Adds macOS-specific functions and aliases                                                   |
+| [`sudo`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/sudo)                           | Press ESC twice to add sudo to current command                                              |
+| [`tmux`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux)                           | Provides aliases for tmux, the terminal multiplexer                                         |
+| [`web-search`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/web-search)               | Adds aliases for searching the web from terminal                                            |
+| [`yarn`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/yarn)                           | Adds completion and aliases for Yarn                                                        |
+| [`you-should-use`](https://github.com/MichaelAquilina/zsh-you-should-use)       | Reminds you of existing aliases                                                             |
+| [`z`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/z)                                 | Jump to frequently used directories                                                         |
+| [`zsh-autosuggestions`](https://github.com/zsh-users/zsh-autosuggestions)                       | Fish-like autosuggestions                                                                   |
+| [`zsh-bat`](https://github.com/fdellwing/zsh-bat)                     | Syntax highlighting using bat                                                               |
+| [`zsh-syntax-highlighting`](https://github.com/zsh-users/zsh-syntax-highlighting)               | Fish-like syntax highlighting                                                               |
 
-## 🐚 Zsh
-
-### Aliases
-
-| Alias | Command  | Description                     |
-| ----- | -------- | ------------------------------- |
-| `vim` | `nvim`   | Use Neovim instead of Vim       |
-| `la`  | `ls -a`  | List all files including hidden |
-| `lla` | `ls -la` | List all files with details     |
-
-### FZF Integration
-
-| Shortcut | Action             |
-| -------- | ------------------ |
-| `Ctrl+F` | FZF file finder    |
-| `Ctrl+R` | FZF history search |
-
-### FZF Functions
-
-| Function          | Action                             | Description                           |
-| ----------------- | ---------------------------------- | ------------------------------------- |
-| `fzf_file_finder` | File search with bat preview       | Search files with syntax highlighting |
-| `fzf_dir_finder`  | Directory search with tree preview | Search directories with tree view     |
-
-### FZF Configuration
-
-- **Theme**: Gruvbox dark colors
-- **Preview**: Bat syntax highlighting for files
-- **Preview**: Tree view for directories
-- **Bindings**:
-  - `ctrl-v`: Open in Neovim
-  - `ctrl-s`: Open in VS Code
-
-### Environment Variables
-
-- **BAT_THEME**: `gruvbox-dark`
-- **FZF_TMUX**: Enabled when in tmux
-- **FZF_TMUX_OPTS**: `-p 50%,50%`
-
-### Oh My Zsh Plugins
-
-- `aliases` - List available shortcuts
-- `brew` - Homebrew aliases
-- `colored-man-pages` - Colored man pages
-- `command-not-found` - Package suggestions
-- `common-aliases` - Common aliases
-- `copyfile` - Copy file to clipboard
-- `copypath` - Copy path to clipboard
-- `dirhistory` - Directory navigation shortcuts
-- `git` - Git aliases and functions
-- `git-prompt` - Git status in prompt
-- `macos` - macOS functions
-- `sudo` - ESC twice for sudo
-- `tmux` - Tmux aliases
-- `web-search` - Web search aliases
-- `yarn` - Yarn completion
-- `you-should-use` - Alias reminders
-- `z` - Directory jumping
-- `zsh-autosuggestions` - Fish-like autosuggestions
-- `zsh-bat` - Syntax highlighting with bat
-- `zsh-syntax-highlighting` - Fish-like syntax highlighting
-
----
-
-## 🎨 Theme & Appearance
-
-### Neovim
-
-- **Colorscheme**: Gruvbox dark
-- **Line Numbers**: Relative + absolute
-- **Cursor Line**: Highlighted
-- **True Colors**: Enabled
-- **Indent**: 2 spaces
-- **Scroll**: 8 lines offset
-
-### Tmux
-
-- **Status Bar**: Gruvbox dark theme
-- **Colors**:
-  - Background: `#3D3836`
-  - Foreground: `#ebdbb2`
-  - Accent: `#AB9881`
-- **Status Left**: Session name
-- **Status Right**: Date and time
-
-### FZF
-
-- **Colors**: Gruvbox dark theme
-- **Border**: Rounded borders
-- **Layout**: Reverse layout
-- **Height**: 80% of screen
-
----
-
-## 🔧 Custom Functions
-
-### Zsh Functions
+### Custom Aliases
 
 ```bash
-# FZF file finder with bat preview
-fzf_file_finder() {
-  fzf --preview 'bat --style=numbers --color=always --line-range=:500 {}' \
-      --preview-window=right:60%:wrap \
-      --bind 'ctrl-v:execute(nvim {})' \
-      --bind 'ctrl-s:execute(code {})'
-}
-
-# FZF directory finder
-fzf_dir_finder() {
-  fzf --preview 'tree -C {} | head -200' \
-      --preview-window=right:60%:wrap
-}
+# File listing
+alias la="ls -a"          # List all files including hidden
+alias lla="ls -la"        # List all files with details
 ```
 
----
+### Additional Configuration
 
-## 📱 Integration Features
-
-### Vim-Tmux Navigator
-
-- Seamless navigation between Neovim splits and tmux panes
-- Uses `<C-h/j/k/l>` for navigation
-
-### FZF Integration
-
-- File search with syntax highlighting
-- Directory search with tree view
-- Integration with Neovim and VS Code
-- Tmux-aware when running in tmux
-
-### Git Integration
-
-- Git status in Neo-tree
-- Git signs in Neovim
-- Git aliases from Oh My Zsh
+- **NVM**: Node Version Manager is configured and loaded automatically
+- **BAT Theme**: Set to `gruvbox-dark` for syntax highlighting
+- **Autosuggestions**: Highlight style set to `fg=60`
 
 ---
 
-## 🎯 Key Features
+## 🖥️ tmux Configuration
 
-### Neovim
+### Key Bindings
 
-- **LSP Support**: Language server protocol
-- **Autocompletion**: Nvim-cmp integration
-- **File Explorer**: Neo-tree with git status
-- **Fuzzy Finder**: FZF integration
-- **Buffer Management**: Easy buffer navigation
-- **Window Management**: Split and resize shortcuts
+#### Pane Navigation (Vi mode)
 
-### Tmux
+- `h` - Move to left pane
+- `j` - Move to down pane
+- `k` - Move to up pane
+- `l` - Move to right pane
 
-- **Session Persistence**: Automatic restore
-- **Mouse Support**: Clickable interface
-- **Theme Integration**: Gruvbox colors
-- **Plugin Ecosystem**: TPM plugin manager
+#### Window Management
 
-### Zsh
+- `Shift + Left Arrow` - Previous window
+- `Shift + Right Arrow` - Next window
 
-- **Powerlevel10k**: Advanced prompt
-- **FZF Integration**: Fuzzy finding
-- **Oh My Zsh**: Plugin ecosystem
-- **Syntax Highlighting**: Fish-like experience
+#### Pane Splitting
+
+- `|` - Split window horizontally
+- `-` - Split window vertically
+
+#### Configuration
+
+- `r` - Reload tmux configuration
+
+### Features
+
+- **Mouse Support**: Enabled for clickable windows, panes, and resizable panes
+- **Vi Mode Keys**: Enabled for copy mode
+- **Window Indexing**: Starts from 1 instead of 0
+- **Theme**: Gruvbox Dark Hard color scheme
+- **Status Bar**: Shows session name, date, and time
+
+### tmux Plugins
+
+Managed via [TPM (Tmux Plugin Manager)](https://github.com/tmux-plugins/tpm):
+
+| Plugin                        | Description                                      |
+| ----------------------------- | ------------------------------------------------ |
+| `tmux-plugins/tpm`            | Tmux Plugin Manager                              |
+| `tmux-plugins/tmux-sensible`  | Basic tmux settings everyone can agree on        |
+| `tmux-plugins/tmux-resurrect` | Persists tmux environment across system restarts |
+| `tmux-plugins/tmux-continuum` | Continuous saving of tmux environment            |
+| `tmux-plugins/tmux-yank`      | System clipboard integration                     |
+
+#### Plugin Installation
+
+1. Press `Ctrl-B` then `I` to install plugins
+2. Press `Ctrl-B` then `U` to update plugins
+3. Press `Ctrl-B` then `alt + u` to uninstall plugins
+
+#### Plugin Features
+
+- **Automatic Restore**: Enabled - tmux sessions are automatically restored on system restart
+- **Pane Contents**: Captured and restored with sessions
 
 ---
 
-> 💡 **Pro Tip**: These shortcuts are specifically configured for your development environment. Use `<leader>?` in Neovim to see available keymaps!
+## 📝 Notes
+
+- The tmux configuration uses Gruvbox Dark Hard theme colors
+- Powerlevel10k instant prompt is enabled for faster shell startup
+- All pane splits maintain the current directory path
+
+---
+
+## 🔗 Useful Links
+
+- [Oh My Zsh](https://ohmyz.sh/)
+- [Powerlevel10k](https://github.com/romkatv/powerlevel10k)
+- [tmux](https://github.com/tmux/tmux)
+- [TPM](https://github.com/tmux-plugins/tpm)

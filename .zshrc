@@ -50,7 +50,6 @@ source $ZSH/oh-my-zsh.sh
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Aliases
-alias vim="nvim"
 alias	la="ls -a"
 alias	lla="ls -la"
 
@@ -60,50 +59,3 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 export BAT_THEME="gruvbox-dark"
-
-# FZF configuration with bat preview
-export FZF_DEFAULT_OPTS="--preview 'bat --style=numbers --color=always --line-range=:500 {}'"
-export FZF_CTRL_F_OPTS="--preview 'bat --style=numbers --color=always --line-range=:500 {}'"
-export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window=up:3:wrap --min-height 20"
-
-# FZF gruvbox theme colors
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-  --color=bg+:#3c3836,bg:#282828,spinner:#fb4934,hl:#928374 \
-  --color=fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934 \
-  --color=marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934"
-
-export FZF_CTRL_F_OPTS="$FZF_CTRL_F_OPTS \
-  --color=bg+:#3c3836,bg:#282828,spinner:#fb4934,hl:#928374 \
-  --color=fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934 \
-  --color=marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934"
-
-export FZF_CTRL_R_OPTS="$FZF_CTRL_R_OPTS \
-  --color=bg+:#3c3836,bg:#282828,spinner:#fb4934,hl:#928374 \
-  --color=fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934 \
-  --color=marker:#fb4934,fg+:#ebdbb2,prompt:#fb4934,hl+:#fb4934"
-
-# FZF file finder with bat preview
-fzf_file_finder() {
-  fzf --preview 'bat --style=numbers --color=always --line-range=:500 {}' \
-      --preview-window=right:60%:wrap \
-      --bind 'ctrl-v:execute(nvim {})' \
-      --bind 'ctrl-s:execute(code {})'
-}
-
-# FZF directory finder
-fzf_dir_finder() {
-  fzf --preview 'tree -C {} | head -200' \
-      --preview-window=right:60%:wrap
-}
-
-# Key bindings for fzf
-bindkey '^F' fzf-file-widget
-bindkey '^R' fzf-history-widget
-
-source <(fzf --zsh)
-
-if [[ -n "$TMUX" ]]; then
-  export FZF_TMUX_OPTS="-p 80%,80%"
-  export FZF_TMUX=1
-fi
-
