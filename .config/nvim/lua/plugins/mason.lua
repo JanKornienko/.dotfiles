@@ -1,7 +1,6 @@
--- ======
+-- =====
 -- MASON
--- ======
--- Automatic LSP server, formatter, and linter installer
+-- =====
 
 return {
   -- Mason core
@@ -66,4 +65,3 @@ return {
     end,
   },
 }
-

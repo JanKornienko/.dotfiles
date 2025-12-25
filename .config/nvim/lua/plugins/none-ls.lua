@@ -1,12 +1,6 @@
--- =========
+-- =======
 -- NONE-LS
--- =========
--- Formatters and linters integration (fork of null-ls)
---
--- NOTE: ESLint support has been removed from none-ls builtins.
--- For ESLint, use the native ESLint LSP server instead:
--- Add 'eslint' to Mason's ensure_installed in mason.lua
--- It will work automatically with lspconfig.
+-- =======
 
 return {
   "nvimtools/none-ls.nvim",
@@ -117,4 +111,3 @@ return {
     end, { desc = "Format buffer with null-ls" })
   end,
 }
-

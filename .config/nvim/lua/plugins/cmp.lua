@@ -1,7 +1,6 @@
 -- ========
 -- NVIM-CMP
 -- ========
--- Autocompletion engine with LSP integration
 
 return {
   "hrsh7th/nvim-cmp",
@@ -118,4 +117,3 @@ return {
     })
   end,
 }
-

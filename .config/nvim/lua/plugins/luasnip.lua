@@ -1,7 +1,6 @@
--- =========
+-- =======
 -- LUASNIP
--- =========
--- Snippet engine for nvim-cmp
+-- =======
 
 return {
   "L3MON4D3/LuaSnip",
@@ -38,4 +37,3 @@ return {
     end, { silent = true, desc = "Jump to previous snippet field" })
   end,
 }
-

@@ -20,6 +20,18 @@ return {
     { "<leader>fw", function() require("fzf-lua").diagnostics_workspace() end, desc = "Workspace diagnostics" },
   },
   config = function()
+    -- Determine which image preview tool is available
+    local preview_cmd
+    if vim.fn.executable("chafa") == 1 then
+      preview_cmd = "[[ $(file --mime-type -b {}) =~ ^image/ ]] && chafa -f symbols --animate off -s {columns}x{lines} {} || bat --color=always --style=numbers --line-range=:500 {}"
+    elseif vim.fn.executable("viu") == 1 then
+      preview_cmd = "[[ $(file --mime-type -b {}) =~ ^image/ ]] && viu -w $(({columns} - 2)) {} || bat --color=always --style=numbers --line-range=:500 {}"
+    elseif vim.fn.executable("imgcat") == 1 then
+      preview_cmd = "[[ $(file --mime-type -b {}) =~ ^image/ ]] && imgcat {} || bat --color=always --style=numbers --line-range=:500 {}"
+    else
+      preview_cmd = "bat --color=always --style=numbers --line-range=:500 {}"
+    end
+
     require("fzf-lua").setup({
       winopts = {
         height = 0.7,
@@ -27,6 +39,14 @@ return {
         row = 0.5,
         col = 0.5,
         border = { "┌", "─", "┐", "│", "┘", "─", "└", "│" },
+        preview = {
+          default = "builtin",
+          horizontal = "right:50%",
+          vertical = "up:50%",
+          layout = "flex",
+          flip_columns = 120,
+          scrollbar = "float",
+        },
         on_create = function()
           vim.cmd("startinsert")
         end,
@@ -34,6 +54,7 @@ return {
       fzf_opts = {
         ["--layout"] = "reverse",
         ["--height"] = "80%",
+        ["--preview-window"] = "right:50%:wrap",
       },
       fzf_colors = {
         pointer = { "fg", "GruvboxRed" },
@@ -44,11 +65,26 @@ return {
       },
       files = {
         prompt = "Files> ",
+        cmd = "rg --files --hidden --follow -g '!.git'",
+        file_icons = true,
+        color_icons = true,
+        git_icons = true,
         actions = {
           ["default"] = require("fzf-lua").actions.file_edit,
           ["ctrl-s"] = require("fzf-lua").actions.file_split,
           ["ctrl-v"] = require("fzf-lua").actions.file_vsplit,
           ["ctrl-t"] = require("fzf-lua").actions.file_tabedit,
+        },
+      },
+      previewers = {
+        builtin = {
+          extensions = {
+            ["png"] = { "chafa", "{file}" },
+            ["jpg"] = { "chafa", "{file}" },
+            ["jpeg"] = { "chafa", "{file}" },
+            ["gif"] = { "chafa", "{file}" },
+            ["webp"] = { "chafa", "{file}" },
+          },
         },
       },
       grep = {

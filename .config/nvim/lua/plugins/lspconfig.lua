@@ -1,7 +1,6 @@
--- ==========
+-- =========
 -- LSPCONFIG
--- ==========
--- Language Server Protocol configuration
+-- =========
 
 return {
   "neovim/nvim-lspconfig",
@@ -271,4 +270,3 @@ return {
     vim.lsp.enable({ "ts_ls", "eslint", "cssls", "tailwindcss", "html", "jsonls", "intelephense", "lua_ls" })
   end,
 }
-
