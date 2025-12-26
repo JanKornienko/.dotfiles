@@ -29,6 +29,7 @@ opt.signcolumn = "yes:1" -- Always show signcolumn, minimum width (1 character)
 opt.cursorline = true -- Highlight current line
 opt.showmode = false -- Don't show mode in command line (shown in statusline)
 opt.laststatus = 2 -- Always show statusline (needed for lualine)
+opt.guicursor = "" -- Keep block cursor in all modes (normal, insert, visual, etc.)
 
 -- Backspace
 opt.backspace = "indent,eol,start" -- Allow backspace on indent, end of line or insert mode start position

@@ -33,7 +33,15 @@ vim.keymap.set("n", "<leader>gv", ":DiffviewOpen<CR>", { desc = "Open diffview" 
 vim.keymap.set("n", "<leader>gV", ":DiffviewClose<CR>", { desc = "Close diffview" })
 vim.keymap.set("n", "<leader>gH", ":DiffviewFileHistory<CR>", { desc = "File history" })
 
+-- Centered scrolling
 vim.keymap.set("n", "<C-d>", "<C-d>zz")
 vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "{", "{zz")
 vim.keymap.set("n", "}", "}zz")
+vim.keymap.set("n", "[[", "[[zz")
+vim.keymap.set("n", "]]", "]]zz")
+vim.keymap.set("n", "n", "nzz")
+vim.keymap.set("n", "N", "Nzz")
+
+-- Paste without overwriting register
+vim.keymap.set("x", "<leader>p", "\"_dP")
