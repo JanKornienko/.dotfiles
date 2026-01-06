@@ -59,3 +59,12 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 export BAT_THEME="gruvbox-dark"
+
+EDITOR=nvim
+export PATH="$HOME/.local/bin:$PATH"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/jankornienko/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/jankornienko/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/jankornienko/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/jankornienko/google-cloud-sdk/completion.zsh.inc'; fi
