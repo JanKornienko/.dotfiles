@@ -70,26 +70,32 @@ A set of modern replacements wired into the shell:
 
 ### 🚀 Neovim Configuration
 
+Hand-rolled config (no distro) on `lazy.nvim`. Web-first: TypeScript, JavaScript, PHP, HTML/CSS/Tailwind, JSON — plus Lua, shell, YAML/TOML/Markdown.
+
 **Leader Key:** `<Space>`
 
 **Quick Keys:**
 
-- `<leader>e` - File explorer (Neo-tree)
-- `<leader>ff` - Find files (FZF)
-- `<leader>fg` - Search in files
-- `gd` - Go to definition
-- `K` - Hover documentation
-- `<leader>gv` - Git diff view
+- `<leader>e` - File explorer (snacks)
+- `<leader>ff` - Find files · `<leader>fg` - Grep
+- `gd` - Go to definition · `gr` - References · `K` - Hover
+- `<leader>ca` - Code action · `<leader>cr` - Rename · `<leader>cf` - Format
+- `<leader>gg` - Lazygit · `]h`/`[h` - Next/prev hunk
+- `Ctrl-h/j/k/l` - Seamless Neovim + tmux navigation
+- `<leader>qs` - Restore session
 
 **Core Plugins:**
 
 - [lazy.nvim](https://github.com/folke/lazy.nvim) - Plugin manager
-- [neo-tree](https://github.com/nvim-neo-tree/neo-tree.nvim) - File explorer
-- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Fuzzy finder
-- [gitsigns](https://github.com/lewis6991/gitsigns.nvim) - Git integration
-- [diffview](https://github.com/sindrets/diffview.nvim) - Git diff viewer
+- [snacks.nvim](https://github.com/folke/snacks.nvim) - Picker, explorer, dashboard, notifier, lazygit
+- [blink.cmp](https://github.com/saghen/blink.cmp) - Completion
+- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) - Syntax & textobjects
+- [mason](https://github.com/mason-org/mason.nvim) + [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) - LSP (vtsls, intelephense, tailwindcss, lua_ls, …)
+- [conform.nvim](https://github.com/stevearc/conform.nvim) + [nvim-lint](https://github.com/mfussenegger/nvim-lint) - Format (Biome) & lint
+- [gitsigns](https://github.com/lewis6991/gitsigns.nvim) - Git hunks
+- [vim-tmux-navigator](https://github.com/christoomey/vim-tmux-navigator) - Seamless pane navigation
 
-**Features:** LSP support, auto-save, image rendering, tmux integration, Gruvbox theme
+**Features:** Hand-rolled modular config, LSP via Mason, Biome formatting/linting, auto-save, session persistence, tmux integration, Gruvbox Dark Hard theme
 
 [View all key bindings and plugins →](https://github.com/jankornienko/.dotfiles/wiki/Neovim)
 
@@ -104,11 +110,11 @@ A set of modern replacements wired into the shell:
 # Install Oh My Zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# Install tmux, editor and image dependencies
-brew install tmux neovim imagemagick chafa
+# Install tmux and editor
+brew install tmux neovim
 
 # Install modern CLI tools
-brew install fzf eza zoxide atuin git-delta thefuck navi
+brew install fzf eza zoxide atuin git-delta thefuck navi ripgrep fd lazygit
 
 # Install Powerlevel10k theme
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
@@ -137,7 +143,7 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 - Configuration uses Gruvbox Dark Hard theme across iTerm, tmux, and Neovim
 - Seamless navigation between tmux panes and Neovim splits via `Ctrl-h/j/k/l`
-- Image support in Neovim requires ImageMagick and chafa
+- Neovim LSP servers, formatters, and linters auto-install on first launch via Mason
 - All configurations are managed with modern plugin managers (lazy.nvim for Neovim, TPM for tmux)
 
 ---
