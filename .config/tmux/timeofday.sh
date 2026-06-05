@@ -5,10 +5,14 @@
 # stays pure-ASCII (editors / tools won't strip the Private-Use glyphs).
 # Wrong/blank glyph? Edit the hex codes below (Nerd Font cheat sheet: nf-weather).
 
-# Encode a hex Unicode codepoint (e.g. e34c) in the U+0800..U+FFFF range to UTF-8.
+# Encode a hex Unicode codepoint (e.g. e34c or f0f62) to UTF-8.
+# Handles 3-byte (U+0800..U+FFFF) and 4-byte (U+10000..) ranges.
 emit() {
   awk -v c=$((16#$1)) 'BEGIN{
-    printf "%c%c%c", 224+int(c/4096), 128+int(c/64)%64, 128+c%64
+    if (c < 65536)
+      printf "%c%c%c", 224+int(c/4096), 128+int(c/64)%64, 128+c%64
+    else
+      printf "%c%c%c%c", 240+int(c/262144), 128+int(c/4096)%64, 128+int(c/64)%64, 128+c%64
   }'
 }
 
@@ -26,7 +30,8 @@ else
   syn=2551442.861          # synodic month in seconds (29.530588853 * 86400)
   idx=$(awk -v n="$now" -v r="$ref" -v s="$syn" \
         'BEGIN{a=((n-r)%s)/s; if(a<0)a+=1; print int(a*8+0.5)%8}')
-  # 8 Nerd Font wi-moon-alt codepoints: new -> waxing -> full -> waning
-  moons=(e3e0 e3e3 e3e7 e3ea e3ee e3f1 e3f5 e3f8)
+  # 8 Nerd Font moon-phase glyphs: new -> waxing -> full -> waning
+  # (nf-md-moon_*; verified present in Hack Nerd Font cmap)
+  moons=(f0f64 f0f67 f0f61 f0f68 f0f62 f0f66 f0f63 f0f65)
   emit "${moons[$idx]}"
 fi
