@@ -31,11 +31,26 @@ Available color schemes in `iterm/`:
 
 - `zsh-autosuggestions` - Fish-like autosuggestions
 - `zsh-syntax-highlighting` - Real-time syntax highlighting
-- `z` - Jump to frequently used directories
 - `git` - Comprehensive Git aliases
 - `you-should-use` - Alias reminders
 
 [View all plugins and configuration →](https://github.com/jankornienko/.dotfiles/wiki/Oh-My-Zsh)
+
+### ⚡ Modern CLI Tools
+
+A set of modern replacements wired into the shell:
+
+| Tool | Replaces | Key usage |
+| --- | --- | --- |
+| [`eza`](https://github.com/eza-community/eza) | `ls` | `ll`, `la`, `lla`, `lt` (tree), `lta` (tree+all+git) |
+| [`zoxide`](https://github.com/ajeetdsouza/zoxide) | `cd`/`z` | `z <dir>` jump by frecency, `zi` interactive |
+| [`fzf`](https://github.com/junegunn/fzf) | — | `Ctrl-T` files, `Alt-C` cd, `**<Tab>` completion |
+| [`atuin`](https://github.com/atuinsh/atuin) | shell history | `Ctrl-R` searchable history (own `Ctrl-S` to scope) |
+| [`git-delta`](https://github.com/dandavison/delta) | git pager | automatic on `git diff`/`show`/`log -p` |
+| [`thefuck`](https://github.com/nvbn/thefuck) | — | `fuck` / `fk` to fix the previous command |
+| [`navi`](https://github.com/denisidoro/navi) | — | `Ctrl-G` interactive cheatsheet (custom cheats in `.config/navi/`) |
+
+**Learning nudges:** typing `ls` or `cd` prints a one-time-per-session reminder pointing to the modern equivalent. Remove the `LEARNING NUDGES` block in `.zshrc` once habits stick.
 
 ### 🖥️ tmux Configuration
 
@@ -47,8 +62,9 @@ Available color schemes in `iterm/`:
 - `h/j/k/l` - Navigate panes (Vi-style)
 - `Ctrl-h/j/k/l` - Seamless Neovim + tmux navigation
 - `r` - Reload configuration
+- `?` - Cheatsheet popup · `Space` - which-key menu · `F` - fuzzy menu
 
-**Features:** Mouse support, Vi mode, Gruvbox theme, session persistence
+**Features:** Mouse support, Vi mode, Gruvbox theme, session persistence, rich status bar (git status with P10k-style signs, directory, weather, sun times, time-of-day icon)
 
 [View all key bindings →](https://github.com/jankornienko/.dotfiles/wiki/tmux)
 
@@ -88,8 +104,11 @@ Available color schemes in `iterm/`:
 # Install Oh My Zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# Install tmux and dependencies
+# Install tmux, editor and image dependencies
 brew install tmux neovim imagemagick chafa
+
+# Install modern CLI tools
+brew install fzf eza zoxide atuin git-delta thefuck navi
 
 # Install Powerlevel10k theme
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k

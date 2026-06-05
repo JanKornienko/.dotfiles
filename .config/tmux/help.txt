@@ -1,0 +1,43 @@
+  ╭──────────────────────────────────────────────────────────────╮
+  │                    TMUX CHEATSHEET                             │
+  │              prefix = Ctrl-b   ·   q to close                  │
+  ╰──────────────────────────────────────────────────────────────╯
+
+  PANES
+    prefix |            split vertical  (left/right)
+    prefix -            split horizontal (top/bottom)
+    prefix h j k l      move between panes (vi style)
+    Ctrl-h j k l        move across panes AND nvim (no prefix)
+    prefix z            zoom / unzoom current pane
+    prefix x            kill pane
+    prefix { / }        swap pane left / right
+    mouse               click/resize panes (enabled)
+
+  WINDOWS
+    prefix c            new window
+    Shift-Left/Right    previous / next window
+    prefix , (comma)    rename window
+    prefix &            kill window
+    prefix 1..9         jump to window N
+
+  SESSIONS
+    prefix d            detach
+    prefix s            list/switch sessions
+    prefix $            rename session
+
+  COPY MODE (vi keys)
+    prefix [            enter copy mode
+    v                   start selection      y  yank (tmux-yank)
+    q                   exit copy mode
+
+  HELP & MENUS
+    prefix Space        which-key menu (all actions)
+    prefix ?            this cheatsheet
+    prefix F            fuzzy menu: sessions/windows/panes/keys
+    prefix /            list every key binding (raw)
+
+  CONFIG & PLUGINS
+    prefix r            reload ~/.tmux.conf
+    prefix I            install plugins (TPM)
+    prefix Ctrl-s       save session   (resurrect)
+    prefix Ctrl-r       restore session (resurrect)

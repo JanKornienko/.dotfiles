@@ -36,7 +36,6 @@ plugins=(
 	web-search        				# Adds aliases for searching the web from terminal
 	yarn              				# Adds completion and aliases for Yarn
 	you-should-use    				# Reminds you of existing aliases
-	z                 				# Jump to frequently used directories
 	zsh-autosuggestions			  # Fish-like autosuggestions
 	zsh-bat										# Syntax highlighting using bat
 	zsh-syntax-highlighting		# Fish-like syntax highlighting
@@ -49,9 +48,56 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# Aliases
-alias	la="ls -a"
-alias	lla="ls -la"
+# =====================
+# MODERN CLI TOOLS
+# =====================
+
+# ---- fzf: fuzzy finder (Ctrl-T files, Alt-C cd, ** completion) ----
+# Note: Ctrl-R is owned by atuin below, not fzf.
+source <(fzf --zsh)
+
+# Gruvbox Dark Hard colors for fzf
+export FZF_DEFAULT_OPTS="
+  --color=bg+:#3c3836,bg:#1d2021,spinner:#fb4934,hl:#928374
+  --color=fg:#ebdbb2,header:#928374,info:#8ec07c,pointer:#fb4934
+  --color=marker:#fb4934,fg+:#ebdbb2,prompt:#fabd2f,hl+:#fb4934"
+
+# ---- atuin: magic shell history (Ctrl-R search). Init after fzf to own Ctrl-R ----
+eval "$(atuin init zsh)"
+
+# ---- zoxide: smarter cd. Use `z <dir>` to jump, `zi` for interactive pick ----
+eval "$(zoxide init zsh)"
+
+# ---- thefuck: fix the previous command. Run `fuck` (or `fk`) after a typo ----
+eval "$(thefuck --alias)"
+alias fk=fuck
+
+# ---- navi: interactive cheatsheet. Ctrl-G pops a fuzzy help/insert menu ----
+export NAVI_PATH="$HOME/.dotfiles/.config/navi/cheats"
+eval "$(navi widget zsh)"
+
+# ---- eza: modern ls (icons, git status, tree) ----
+alias ll='eza -l --icons --git --group-directories-first'
+alias la='eza -a --icons --group-directories-first'
+alias lla='eza -la --icons --git --group-directories-first'
+alias lt='eza --tree --level=2 --icons --group-directories-first'
+alias lta='eza --tree --level=2 -a --git --icons --group-directories-first'
+
+# =====================
+# LEARNING NUDGES
+# Remind to use the new tools when old habits fire (once per session each).
+# Delete this block once the muscle memory sticks.
+# =====================
+typeset -gA _NUDGED
+_nudge() {
+  local key=$1 msg=$2
+  [[ -n ${_NUDGED[$key]} ]] && return
+  _NUDGED[$key]=1
+  print -P "%F{yellow}💡 ${msg}%f" >&2
+}
+unalias ls cd 2>/dev/null
+ls() { _nudge ls "Modern: %Beza%b — aliases: ll (long+git), la (all), lt (tree)"; command ls "$@"; }
+cd() { _nudge cd "Modern: %Bz <dir>%b jumps by frecency, %Bzi%b picks interactively"; builtin cd "$@"; }
 
 # NVM
 export NVM_DIR="$HOME/.nvm"

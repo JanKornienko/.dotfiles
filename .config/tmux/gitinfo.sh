@@ -2,7 +2,8 @@
 # Git status for tmux status-right, powerline / k9s style.
 # Usage: gitinfo.sh "<path>"   (tmux passes #{pane_current_path})
 #
-# Output:  <branch>  ⇡ahead ⇣behind ✕conflicts ●staged ✚modified …untracked ⚑stash
+# Output:  <branch>  ⇡ahead ⇣behind ~conflicts +staged !modified ?untracked *stash
+# Signs match Powerlevel10k: + staged, ! unstaged, ? untracked, ~ conflict, * stash.
 # Only non-zero counters are shown. Color codes (#[fg=..]) are embedded so tmux
 # renders each counter in its own color. Prints nothing outside a git repo.
 
@@ -34,8 +35,8 @@ emit() { awk -v c=$((16#$1)) 'BEGIN{printf "%c%c%c",224+int(c/4096),128+int(c/64
 emit e0a0; printf ' %s' "$b"                                    # branch
 [ "$ahead"     -gt 0 ] && printf '#[fg=#b8bb26] \342\207\241%s' "$ahead"      # ⇡ ahead
 [ "$behind"    -gt 0 ] && printf '#[fg=#fb4934] \342\207\243%s' "$behind"     # ⇣ behind
-[ "$conflict"  -gt 0 ] && printf '#[fg=#fb4934] \342\234\225%s' "$conflict"   # ✕ conflict
-[ "$staged"    -gt 0 ] && printf '#[fg=#b8bb26] \342\227\217%s' "$staged"     # ● staged
-[ "$modified"  -gt 0 ] && printf '#[fg=#fabd2f] \342\234\232%s' "$modified"   # ✚ modified
-[ "$untracked" -gt 0 ] && printf '#[fg=#83a598] \342\200\246%s' "$untracked"  # … untracked
-[ "$stash"     -gt 0 ] && printf '#[fg=#8ec07c] \342\232\221%s' "$stash"      # ⚑ stash
+[ "$conflict"  -gt 0 ] && printf '#[fg=#fb4934] ~%s' "$conflict"   # ~ conflict
+[ "$staged"    -gt 0 ] && printf '#[fg=#b8bb26] +%s' "$staged"     # + staged
+[ "$modified"  -gt 0 ] && printf '#[fg=#fabd2f] !%s' "$modified"   # ! unstaged/modified
+[ "$untracked" -gt 0 ] && printf '#[fg=#83a598] ?%s' "$untracked"  # ? untracked
+[ "$stash"     -gt 0 ] && printf '#[fg=#8ec07c] *%s' "$stash"      # * stash
