@@ -51,9 +51,13 @@ loc_stale=0; wx_stale=0
 [ "$loc_stale" = 0 ] && [ "$wx_stale" = 0 ] && exit 0
 
 # ---- detached background refresh (single-flight via lock dir) ----
+# Drop a stale lock first: a refresh killed by SIGHUP (ssh disconnect, crash)
+# never runs its EXIT trap, and the leftover dir would block refreshes forever.
+[ -d "$lock" ] && [ -n "$(find "$lock" -maxdepth 0 -mmin +5 2>/dev/null)" ] && rmdir "$lock" 2>/dev/null
 mkdir "$lock" 2>/dev/null || exit 0   # another refresh already running
 (
   trap 'rmdir "$lock" 2>/dev/null' EXIT
+  trap '' HUP   # survive ssh disconnect; the refresh is short (<10s)
 
   if [ "$loc_stale" = 1 ]; then
     d=$(curl -fs --max-time 5 'http://ip-api.com/json/?fields=lat,lon' 2>/dev/null)
