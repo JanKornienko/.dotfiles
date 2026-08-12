@@ -1,6 +1,17 @@
 # Dotfiles
 
-My personal dotfiles configuration for macOS.
+My personal dotfiles for **macOS and Ubuntu/Debian**, on both x86_64 and ARM.
+One command bootstraps a fresh machine:
+
+```bash
+git clone git@github.com:JanKornienko/.dotfiles.git ~/.dotfiles
+~/.dotfiles/install.sh
+```
+
+`install.sh` is idempotent — re-run it any time. It installs packages (apt or
+Homebrew), fetches the tools apt ships too old or not at all, clones the zsh and
+tmux plugins, symlinks every config below, and asks once for the git identity.
+Coder workspaces pick it up automatically via `coder dotfiles <repo>`.
 
 ## 📖 Documentation
 
@@ -101,35 +112,59 @@ Hand-rolled config (no distro) on `lazy.nvim`. Web-first: TypeScript, JavaScript
 
 ## 📦 Installation
 
-### Prerequisites
-
 ```bash
-# Install Homebrew (if not installed)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install Oh My Zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-# Install tmux and editor
-brew install tmux neovim
-
-# Install modern CLI tools
-brew install fzf eza zoxide atuin git-delta thefuck navi ripgrep fd lazygit
-
-# Install Powerlevel10k theme
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-
-# Install TPM (Tmux Plugin Manager)
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+git clone git@github.com:JanKornienko/.dotfiles.git ~/.dotfiles
+~/.dotfiles/install.sh
+exec zsh
 ```
 
-### Setup
+On macOS, Homebrew must already be present (`install.sh` refuses to guess);
+everything else is handled. On Linux it needs `sudo` for apt — without it, system
+packages are skipped and the user-local binaries still install into
+`~/.local/bin`.
 
-1. Clone this repository
-2. Symlink configuration files to your home directory
-3. Install tmux plugins: `Ctrl-B` + `I`
-4. Configure Powerlevel10k: `p10k configure`
-5. Install Neovim plugins: Open Neovim and run `:Lazy sync`
+### What gets symlinked
+
+| Repo path | Symlinked to |
+| --- | --- |
+| `.zshrc` | `~/.zshrc` |
+| `.zprofile` | `~/.zprofile` |
+| `.p10k.zsh` | `~/.p10k.zsh` |
+| `.tmux.conf` | `~/.tmux.conf` |
+| `.gitconfig` | `~/.gitconfig` |
+| `.config/nvim/` | `~/.config/nvim` |
+| `.config/git/ignore` | `~/.config/git/ignore` |
+| `.config/htop/htoprc` | `~/.config/htop/htoprc` |
+| `.config/atuin/config.toml` | `~/.config/atuin/config.toml` |
+| `.config/gh/config.yml` | `~/.config/gh/config.yml` |
+
+`.config/tmux/` (status-bar scripts) and `.config/navi/` (cheats) are read
+straight out of the repo — `.tmux.conf` and `$NAVI_PATH` point at `~/.dotfiles`,
+so they need no link.
+
+An existing real file at a link target is moved to `<file>.bak` before being
+replaced, once — a re-run never clobbers the first backup.
+
+### Per-machine files (never committed)
+
+| File | Holds |
+| --- | --- |
+| `~/.gitconfig.local` | git `user.name` / `user.email`. Created by `install.sh`, `include`d from `.gitconfig`. |
+| `~/.zshrc.local` | host-specific PATH entries, tokens, work-only settings. Sourced last by `.zshrc`. |
+| `~/.zprofile.local` | login-shell env for this host only. |
+| `~/.config/gh/hosts.yml` | the GitHub CLI token. Run `gh auth login` per machine. |
+
+Anything an app installer appends to `~/.zshrc` belongs in `~/.zshrc.local`
+instead — otherwise it lands in the tracked file and breaks the next machine.
+
+### After the first run
+
+1. Set a Nerd Font in the terminal (macOS gets `font-meslo-lg-nerd-font`
+   installed) — Powerlevel10k renders as tofu boxes without one.
+2. `gh auth login`, if the GitHub CLI is used.
+3. tmux plugins install automatically; `Ctrl-B` + `I` to redo it by hand.
+4. Neovim plugins sync headlessly on install; `:Lazy sync` to redo.
+5. `p10k configure` only to change the prompt — `.p10k.zsh` is already tuned.
 
 ## 📚 Additional Resources
 
