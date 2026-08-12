@@ -1,0 +1,9 @@
+# ==========
+# GITHUB CLI
+# Only non-default settings. Auth tokens live in hosts.yml, which is
+# deliberately NOT tracked — run `gh auth login` on each new machine.
+# ==========
+version: 1
+git_protocol: https
+aliases:
+    co: pr checkout

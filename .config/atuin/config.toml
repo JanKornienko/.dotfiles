@@ -1,0 +1,13 @@
+# ==========
+# ATUIN — shell history (Ctrl-R)
+# Only settings that differ from upstream defaults. Run `atuin gen-completions`
+# or see https://docs.atuin.sh/configuration/config/ for the full reference.
+# ==========
+
+## Enter runs the selected command immediately; Tab puts it on the prompt for
+## editing instead.
+enter_accept = true
+
+[sync]
+## Sync v2. Set explicitly so a fresh install does not fall back to v1.
+records = true
