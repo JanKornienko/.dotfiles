@@ -4,6 +4,9 @@
 # Location  : auto-detected from public IP (ip-api.com), cached, refreshed
 #             at most once per day.
 # Weather   : open-meteo.com (no API key), cached, refreshed at most every 30m.
+#             Falls back to wttr.in when open-meteo can't be reached -- some
+#             hosts (e.g. datacenter/VPS egress) blackhole it, and then the
+#             segment would silently stay empty forever.
 # Non-blocking: tmux always gets the cached value instantly; stale data is
 #             refreshed in a detached background job so the status bar never hangs.
 #
@@ -30,6 +33,22 @@ icon_for() { # WMO weather_code -> Nerd Font wi codepoint
     80|81|82)                       emit e319 ;; # rain showers
     95|96|99)                       emit e31d ;; # thunderstorm
     *)                              emit e30d ;;
+  esac
+}
+
+code_for_desc() { # wttr.in condition text -> nearest WMO code, so icon_for
+                  # stays the single source of truth for glyphs.
+                  # Order matters: "Light snow showers" must hit snow, not showers.
+  case "$(printf '%s' "$1" | tr 'A-Z' 'a-z')" in
+    *thunder*)                    echo 95 ;;
+    *snow*|*sleet*|*blizzard*|*ice*) echo 71 ;;
+    *shower*)                     echo 80 ;;
+    *drizzle*)                    echo 51 ;;
+    *rain*)                       echo 61 ;;
+    *fog*|*mist*)                 echo 45 ;;
+    *overcast*)                   echo 3 ;;
+    *cloud*)                      echo 2 ;;
+    *)                            echo 0 ;;  # sunny / clear
   esac
 }
 
@@ -70,15 +89,43 @@ mkdir "$lock" 2>/dev/null || exit 0   # another refresh already running
   coords=$(sed -n 2p "$loc"); lat=${coords%% *}; lon=${coords##* }
   [ -n "$lat" ] && [ -n "$lon" ] || exit 0
 
+  # ---- provider 1: open-meteo (WMO codes; weather + sun in one call) ----
   resp=$(curl -fs --max-time 5 \
     "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code&daily=sunrise,sunset&timezone=auto" 2>/dev/null)
   temp=$(printf '%s' "$resp" | grep -Eo '"temperature_2m":-?[0-9]+(\.[0-9]+)?' | head -n1 | cut -d: -f2)
   code=$(printf '%s' "$resp" | grep -Eo '"weather_code":[0-9]+' | head -n1 | cut -d: -f2)
-  [ -n "$temp" ] && [ -n "$code" ] && printf '%s %s\n' "$code" "$temp" > "$wx"
-
-  # daily sunrise/sunset (local time, "HH:MM HH:MM") for suntimes.sh
+  # sunrise/sunset are in the *location's* local time, so keep its UTC offset
+  # too -- the server clock may be on a different zone (VPS on UTC).
   sr=$(printf '%s' "$resp" | grep -Eo '"sunrise":\["[0-9-]+T[0-9:]+' | head -n1 | sed 's/.*T//')
   ss=$(printf '%s' "$resp" | grep -Eo '"sunset":\["[0-9-]+T[0-9:]+'  | head -n1 | sed 's/.*T//')
-  [ -n "$sr" ] && [ -n "$ss" ] && printf '%s %s\n' "$sr" "$ss" > "$cache/sun"
+  off=$(printf '%s' "$resp" | grep -Eo '"utc_offset_seconds":-?[0-9]+' | head -n1 | cut -d: -f2)
+
+  # ---- provider 2: wttr.in, only if open-meteo gave us nothing ----
+  # %t temp, %C condition text, %S sunrise, %s sunset, %T local time + offset.
+  if [ -z "$temp" ] || [ -z "$code" ]; then
+    resp=$(curl -fs --max-time 8 \
+      "https://wttr.in/$lat,$lon?format=%t|%C|%S|%s|%T" 2>/dev/null)
+    IFS='|' read -r w_temp w_cond w_sr w_ss w_now <<EOF
+$resp
+EOF
+    # "+28<degree>C" -> "28"  (strip the sign and the multi-byte degree sign)
+    temp=$(printf '%s' "$w_temp" | LC_ALL=C tr -cd '0-9.-')
+    [ -n "$w_cond" ] && code=$(code_for_desc "$w_cond")
+    sr=$(printf '%s' "$w_sr" | cut -c1-5)   # "06:02:14" -> "06:02"
+    ss=$(printf '%s' "$w_ss" | cut -c1-5)
+    # "14:30:50+0200" -> 7200
+    hhmm=$(printf '%s' "$w_now" | grep -Eo '[+-][0-9]{4}$')
+    if [ -n "$hhmm" ]; then
+      off=$(( 10#$(printf '%s' "$hhmm" | cut -c2-3) * 3600 \
+            + 10#$(printf '%s' "$hhmm" | cut -c4-5) * 60 ))
+      [ "$(printf '%s' "$hhmm" | cut -c1)" = "-" ] && off=$(( -off ))
+    fi
+  fi
+
+  [ -n "$temp" ] && [ -n "$code" ] && printf '%s %s\n' "$code" "$temp" > "$wx"
+
+  # sun cache for suntimes.sh: "HH:MM HH:MM UTC_OFFSET_SECONDS" (location-local
+  # times; the offset lets suntimes.sh work on a server in any timezone)
+  [ -n "$sr" ] && [ -n "$ss" ] && printf '%s %s %s\n' "$sr" "$ss" "$off" > "$cache/sun"
 ) >/dev/null 2>&1 &
 exit 0
