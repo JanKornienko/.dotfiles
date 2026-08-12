@@ -1,0 +1,59 @@
+{
+  "version": 3,
+  "skills": {
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "3013fdeb8a11b10b1eb795ec3ae8bfca38f7c26d",
+      "installedAt": "2026-04-11T21:10:21.733Z",
+      "updatedAt": "2026-04-11T21:10:21.733Z"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/agent-skills.git",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "skillFolderHash": "3116f3e62dbd02b44a598b1aa690d2a8938e8f89",
+      "installedAt": "2026-08-10T13:23:27.780Z",
+      "updatedAt": "2026-08-10T13:23:27.780Z"
+    },
+    "extract-design-system": {
+      "source": "arvindrk/extract-design-system",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/arvindrk/extract-design-system.git",
+      "skillPath": "skills/extract-design-system/SKILL.md",
+      "skillFolderHash": "e64b6fec82d59d296aad44ef9dacf42ad1d5eafd",
+      "installedAt": "2026-08-10T13:23:30.326Z",
+      "updatedAt": "2026-08-10T13:23:30.326Z"
+    },
+    "tailwind-design-system": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/wshobson/agents.git",
+      "skillPath": "plugins/frontend-mobile-development/skills/tailwind-design-system/SKILL.md",
+      "skillFolderHash": "a2164c2d9785aada08dfe3f5e792657c9acafc52",
+      "installedAt": "2026-08-10T13:23:33.070Z",
+      "updatedAt": "2026-08-10T13:23:33.070Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  },
+  "lastSelectedAgents": [
+    "amp",
+    "antigravity",
+    "cline",
+    "codex",
+    "cursor",
+    "deepagents",
+    "firebender",
+    "gemini-cli",
+    "github-copilot",
+    "kimi-cli",
+    "opencode",
+    "warp",
+    "claude-code"
+  ]
+}

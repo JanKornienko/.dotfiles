@@ -190,6 +190,28 @@ link "$DOTFILES/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
 link "$DOTFILES/.config/gh/config.yml"    "$HOME/.config/gh/config.yml"
 chmod +x "$DOTFILES/.config/tmux/"*.sh 2>/dev/null || true
 
+# ---------------------------------------------------------------- claude code
+# Appearance and tooling only -- see claude/README.md for what is deliberately
+# left out (plugin cache, session state, ~/.claude.json).
+link "$DOTFILES/claude/settings.json"     "$HOME/.claude/settings.json"
+link "$DOTFILES/claude/statusline.sh"     "$HOME/.claude/statusline.sh"
+link "$DOTFILES/claude/keybindings.json"  "$HOME/.claude/keybindings.json"
+chmod +x "$DOTFILES/claude/statusline.sh" 2>/dev/null || true
+
+# Skills: the real content lives in ~/.agents/skills, and ~/.claude/skills holds
+# relative symlinks into it. Link the store, then recreate one link per skill so
+# Claude Code discovers them -- and so installing a skill on either machine shows
+# up as a change in this repo.
+link "$DOTFILES/agents" "$HOME/.agents"
+if [ -d "$DOTFILES/agents/skills" ]; then
+  mkdir -p "$HOME/.claude/skills"
+  for s in "$DOTFILES/agents/skills"/*/; do
+    [ -d "$s" ] || continue
+    n=$(basename "$s")
+    ln -sfn "../../.agents/skills/$n" "$HOME/.claude/skills/$n"
+  done
+fi
+
 # ---------------------------------------------------------------- git identity
 # .gitconfig includes this file; it stays out of the repo so no email address is
 # committed. Prompts only when attached to a terminal — unattended runs (Coder
