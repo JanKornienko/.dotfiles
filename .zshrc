@@ -52,9 +52,12 @@ source $ZSH/oh-my-zsh.sh
 # MODERN CLI TOOLS
 # =====================
 
+# Every tool below is guarded so the shell still starts on a box where one is
+# missing (remote/Coder workspaces install a subset — see install.sh).
+
 # ---- fzf: fuzzy finder (Ctrl-T files, Alt-C cd, ** completion) ----
 # Note: Ctrl-R is owned by atuin below, not fzf.
-source <(fzf --zsh)
+(( $+commands[fzf] )) && source <(fzf --zsh)
 
 # Gruvbox Dark Hard colors for fzf
 export FZF_DEFAULT_OPTS="
@@ -63,18 +66,21 @@ export FZF_DEFAULT_OPTS="
   --color=marker:#fb4934,fg+:#ebdbb2,prompt:#fabd2f,hl+:#fb4934"
 
 # ---- atuin: magic shell history (Ctrl-R search). Init after fzf to own Ctrl-R ----
-eval "$(atuin init zsh)"
+(( $+commands[atuin] )) && eval "$(atuin init zsh)"
 
 # ---- zoxide: smarter cd. Use `z <dir>` to jump, `zi` for interactive pick ----
-eval "$(zoxide init zsh)"
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh)"
 
 # ---- thefuck: fix the previous command. Run `fuck` (or `fk`) after a typo ----
-eval "$(thefuck --alias)"
-alias fk=fuck
+# Not installed on Linux — upstream is broken under Python 3.12.
+if (( $+commands[thefuck] )); then
+  eval "$(thefuck --alias)"
+  alias fk=fuck
+fi
 
 # ---- navi: interactive cheatsheet. Ctrl-G pops a fuzzy help/insert menu ----
 export NAVI_PATH="$HOME/.dotfiles/.config/navi/cheats"
-eval "$(navi widget zsh)"
+(( $+commands[navi] )) && eval "$(navi widget zsh)"
 
 # ---- eza: modern ls (icons, git status, tree) ----
 alias ll='eza -l --icons --git --group-directories-first'
