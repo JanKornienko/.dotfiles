@@ -9,9 +9,10 @@ git clone git@github.com:JanKornienko/.dotfiles.git ~/.dotfiles
 ```
 
 `install.sh` is idempotent — re-run it any time. It installs packages (apt or
-Homebrew), fetches the tools apt ships too old or not at all, clones the zsh and
-tmux plugins, symlinks every config below, and asks once for the git identity.
-Coder workspaces pick it up automatically via `coder dotfiles <repo>`.
+Homebrew), fetches the tools apt ships too old or not at all, installs node LTS
+through nvm, clones the zsh and tmux plugins, symlinks every config below, and
+asks once for the git identity. Coder workspaces pick it up automatically via
+`coder dotfiles <repo>`.
 
 ## 📖 Documentation
 

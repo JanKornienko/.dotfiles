@@ -63,9 +63,12 @@ if [ "$OS" = linux ]; then
     # git-delta backs the pager configured in .gitconfig. eza and git-delta are
     # missing from Ubuntu < 24.04 (noble); `|| true` on the second call keeps a
     # single unavailable package from aborting the whole run.
+    # pipx backs the thefuck install further down. imagemagick and chafa are what
+    # the terminal-image previews (snacks.nvim, tmux passthrough) shell out to.
     $SUDO apt-get install -y -qq \
       zsh tmux git curl wget unzip tar ca-certificates \
       zoxide bat fd-find ripgrep jq \
+      imagemagick chafa pipx \
       command-not-found build-essential python3-pip locales >/dev/null
     $SUDO apt-get install -y -qq eza git-delta >/dev/null 2>&1 || true
 
@@ -78,7 +81,9 @@ if [ "$OS" = linux ]; then
 else
   have brew || { echo "install Homebrew first"; exit 1; }
   log "brew packages"
-  brew install -q zsh tmux eza zoxide bat fd ripgrep jq fzf neovim atuin navi thefuck git-delta || true
+  brew install -q zsh tmux eza zoxide bat fd ripgrep jq fzf neovim atuin navi thefuck git-delta \
+    gh nvm imagemagick chafa || true
+  mkdir -p "${NVM_DIR:-$HOME/.nvm}"   # brew's nvm refuses to run without it
   # Powerlevel10k draws its separators and icons from a Nerd Font. Without one
   # the prompt renders as tofu boxes — set the font in iTerm/Terminal after this.
   brew install -q --cask font-meslo-lg-nerd-font || true
@@ -142,9 +147,105 @@ if [ "$OS" = linux ]; then
     find "$tmp" -name delta -type f -exec install -m755 {} "$BIN/delta" \; 2>/dev/null || true
     rm -rf "$tmp"
   fi
-  # NOTE: thefuck is skipped on Linux — it is broken under Python 3.12.
-  # .zshrc guards the eval, so nothing breaks by its absence.
+  # gh — GitHub CLI. Its config.yml is symlinked further down, so the binary has
+  # to be here too; without it the tracked config sat unused and the README's
+  # `gh auth login` step could not be run at all. apt has gh, but 24.04 pins
+  # 2.45 (2024) against the current build Homebrew gives the Mac, so take the
+  # release tarball like the tools above.
+  if ! have gh; then
+    log "gh"
+    v=$(gh_latest cli/cli)
+    tmp=$(mktemp -d)
+    curl -fsSL "https://github.com/cli/cli/releases/download/${v}/gh_${v#v}_linux_${GOARCH}.tar.gz" |
+      tar xz -C "$tmp"
+    find "$tmp" -type f -name gh -path '*/bin/*' -exec install -m755 {} "$BIN/gh" \;
+    rm -rf "$tmp"
+  fi
+
+  # thefuck — was skipped here as "broken under Python 3.12", which it is, in two
+  # separate ways. Both are fixable inside the pipx venv, so the Mac and Linux
+  # now behave the same instead of `fuck`/`fk` silently not existing on Linux:
+  #   distutils  removed in 3.12; injecting setuptools restores it, since
+  #              setuptools ships its own distutils and a .pth that wins imports.
+  #   imp        also removed in 3.12, with no shim anywhere. thefuck 3.32 calls
+  #              imp.load_source in conf.py and types.py to load user rule files.
+  #              Upstream is unmaintained, so the venv gets a small imp.py with
+  #              just that one function, written the way the Python docs say to
+  #              replace it. It shadows nothing — no stdlib imp exists on 3.12+.
+  # The shim lives in site-packages, not in thefuck's own files, so a
+  # `pipx upgrade` keeps it — but a `pipx reinstall` recreates the venv and drops
+  # it. Re-running this script puts it back.
+  if ! have thefuck && have pipx; then
+    log "thefuck"
+    pipx install thefuck >/dev/null 2>&1 || true
+    pipx inject thefuck setuptools >/dev/null 2>&1 || true
+    site=$(find "$HOME/.local/share/pipx/venvs/thefuck/lib" -maxdepth 2 \
+             -name site-packages -type d 2>/dev/null | head -1)
+    if [ -n "$site" ] && [ ! -f "$site/imp.py" ]; then
+      cat > "$site/imp.py" <<'PYSHIM'
+"""Minimal `imp` shim for thefuck on Python 3.12+.
+
+The stdlib `imp` module was removed in 3.12, but thefuck 3.32 still calls
+imp.load_source from conf.py and types.py. Upstream is unmaintained, so this
+provides the one function used, via the importlib recipe the Python docs give
+as the replacement. Installed by dotfiles/install.sh; safe to delete, at the
+cost of thefuck failing at import again.
+"""
+
+import importlib.machinery
+import importlib.util
+import sys
+
+
+def load_source(name, pathname, file=None):
+    loader = importlib.machinery.SourceFileLoader(name, pathname)
+    spec = importlib.util.spec_from_file_location(name, pathname, loader=loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    loader.exec_module(module)
+    return module
+PYSHIM
+    fi
+  fi
 fi
+
+# ---------------------------------------------------------------- node (nvm)
+# .zshrc sources nvm from the Homebrew prefix or $NVM_DIR, but nothing ever
+# installed it — a fresh box had no node at all. macOS gets nvm from brew above;
+# Linux from the upstream installer.
+#
+# PROFILE=/dev/null is load-bearing: left unset, that installer appends its init
+# block to ~/.zshrc — which here is the tracked symlink, exactly what the README
+# says must go in ~/.zshrc.local instead. .zshrc already sources nvm.sh itself.
+NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+mkdir -p "$NVM_DIR"
+if [ "$OS" = linux ] && [ ! -s "$NVM_DIR/nvm.sh" ]; then
+  log "nvm"
+  v=$(gh_latest nvm-sh/nvm)
+  curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/${v}/install.sh" |
+    PROFILE=/dev/null bash >/dev/null
+fi
+
+# Node itself, through whichever nvm landed. Strict mode is lifted around the
+# source: nvm.sh reads unset variables and returns non-zero on paths that are not
+# failures, so `set -eu` would abort the whole bootstrap here.
+for _nvm in \
+  "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/nvm/nvm.sh" \
+  /usr/local/opt/nvm/nvm.sh \
+  "$NVM_DIR/nvm.sh"
+do
+  [ -s "$_nvm" ] || continue
+  set +eu
+  . "$_nvm"
+  if ! have node; then
+    log "node lts"
+    nvm install --lts >/dev/null 2>&1
+    nvm alias default 'lts/*' >/dev/null 2>&1
+  fi
+  set -eu
+  break
+done
+unset _nvm
 
 # ---------------------------------------------------------------- claude code
 if ! have claude; then

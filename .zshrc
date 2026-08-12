@@ -79,7 +79,8 @@ export FZF_DEFAULT_OPTS="
 (( $+commands[zoxide] )) && eval "$(zoxide init zsh)"
 
 # ---- thefuck: fix the previous command. Run `fuck` (or `fk`) after a typo ----
-# Not installed on Linux — upstream is broken under Python 3.12.
+# Installed on both platforms now. On Linux it needs two shims for Python 3.12
+# (removed distutils and imp) — install.sh applies them inside the pipx venv.
 if (( $+commands[thefuck] )); then
   eval "$(thefuck --alias)"
   alias fk=fuck
