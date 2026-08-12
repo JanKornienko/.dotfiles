@@ -77,6 +77,23 @@ A set of modern replacements wired into the shell:
 
 **Features:** Mouse support, Vi mode, Gruvbox theme, session persistence, rich status bar (git status with P10k-style signs, directory, weather, sun times, time-of-day icon)
 
+**Identical rendering on every host.** Two things had to be pinned for that:
+
+- `default-terminal` is set to `tmux-256color`. Left unset it varies by host, and
+  `screen-256color`'s terminfo has no `sitm`, so tmux swaps reverse video in for
+  the `italics` attribute — which silently turned the folder segment's foreground
+  colour into a background box on one machine and not the other.
+- Weather coordinates are pinned in `.config/tmux/weather.conf`. IP-based
+  detection reports wherever the host's traffic egresses, so a remote workspace
+  showed its datacenter's sunrise instead of yours.
+
+### 🤖 Claude Code
+
+Global appearance and tooling are tracked too — statusline (context %, model,
+rate limits), enabled plugins, marketplaces, theme, key bindings, and personal
+skills. See [`claude/README.md`](claude/README.md), including what is
+deliberately left untracked.
+
 [View all key bindings →](https://github.com/jankornienko/.dotfiles/wiki/tmux)
 
 ### 🚀 Neovim Configuration
@@ -137,6 +154,10 @@ packages are skipped and the user-local binaries still install into
 | `.config/htop/htoprc` | `~/.config/htop/htoprc` |
 | `.config/atuin/config.toml` | `~/.config/atuin/config.toml` |
 | `.config/gh/config.yml` | `~/.config/gh/config.yml` |
+| `claude/settings.json` | `~/.claude/settings.json` |
+| `claude/statusline.sh` | `~/.claude/statusline.sh` |
+| `claude/keybindings.json` | `~/.claude/keybindings.json` |
+| `agents/` | `~/.agents` (skills store) |
 
 `.config/tmux/` (status-bar scripts) and `.config/navi/` (cheats) are read
 straight out of the repo — `.tmux.conf` and `$NAVI_PATH` point at `~/.dotfiles`,
