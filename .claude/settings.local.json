@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x /Users/jankornienko/.dotfiles/.config/tmux/timeofday.sh)",
+      "Bash(/Users/jankornienko/.dotfiles/.config/tmux/timeofday.sh)",
+      "Bash(xxd)",
+      "Bash(rm -f ~/.cache/tmux-weather/weather ~/.cache/tmux-weather/sun)",
+      "Bash(./.config/tmux/weather.sh)",
+      "Read(//Users/jankornienko/.cache/tmux-weather/**)",
+      "Bash(./.config/tmux/suntimes.sh)",
+      "Bash(echo \"sun render: [$\\(./.config/tmux/suntimes.sh\\)]\")"
+    ]
+  }
+}
