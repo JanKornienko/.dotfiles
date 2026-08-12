@@ -18,6 +18,14 @@ wx="$cache/weather"        # "weather_code temperature"
 lock="$cache/.refresh.lock"
 mkdir -p "$cache"
 
+# ---- location: pinned config wins over IP detection ----
+# weather.conf pins the coordinates so every host reports the same place; see the
+# comments there. The .local sibling is sourced second so a single host can
+# override without touching the tracked file.
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+[ -f "$here/weather.conf" ] && . "$here/weather.conf"
+[ -f "$HOME/.config/tmux/weather.local.conf" ] && . "$HOME/.config/tmux/weather.local.conf"
+
 emit() { # hex codepoint (U+0800..U+FFFF) -> UTF-8 bytes
   awk -v c=$((16#$1)) 'BEGIN{printf "%c%c%c",224+int(c/4096),128+int(c/64)%64,128+c%64}'
 }
@@ -65,7 +73,15 @@ fi
 # ---- decide whether a refresh is due ----
 today=$(date +%Y-%m-%d)
 loc_stale=0; wx_stale=0
-[ -f "$loc" ] && [ "$(head -n1 "$loc" 2>/dev/null)" = "$today" ] || loc_stale=1
+if [ -n "${WEATHER_LATLON:-}" ]; then
+  # Pinned coordinates: keep the cache in sync without ever calling ip-api.
+  # Rewritten only when it actually differs -- this runs on every status refresh.
+  want="$today
+$WEATHER_LATLON"
+  [ "$(cat "$loc" 2>/dev/null)" = "$want" ] || printf '%s\n' "$want" > "$loc"
+else
+  [ -f "$loc" ] && [ "$(head -n1 "$loc" 2>/dev/null)" = "$today" ] || loc_stale=1
+fi
 [ -f "$wx" ] && [ -z "$(find "$wx" -mmin +30 2>/dev/null)" ] || wx_stale=1
 [ "$loc_stale" = 0 ] && [ "$wx_stale" = 0 ] && exit 0
 
