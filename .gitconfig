@@ -1,0 +1,35 @@
+# ==========
+# .GITCONFIG
+# Identity lives in ~/.gitconfig.local (untracked, per machine) so this file can
+# be shared across hosts without baking in an email address. install.sh creates
+# that file on first run.
+# ==========
+
+[include]
+	path = ~/.gitconfig.local
+
+[push]
+	autoSetupRemote = true
+
+[core]
+	# delta: syntax-highlighted diffs. Falls back to less if delta is missing.
+	pager = delta
+	excludesfile = ~/.config/git/ignore
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	line-numbers = true
+	side-by-side = false
+	syntax-theme = gruvbox-dark
+
+[merge]
+	conflictStyle = zdiff3
+
+[diff]
+	colorMoved = default
+
+[init]
+	defaultBranch = main

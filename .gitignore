@@ -1,3 +1,9 @@
 .DS_Store
 .dotfiles.wiki
 CLAUDE.md
+
+# Per-machine files. Never tracked: they hold identity, tokens or host-specific
+# paths. install.sh creates the ones it needs.
+*.local
+*.bak
+.config/gh/hosts.yml
