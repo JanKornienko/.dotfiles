@@ -21,7 +21,6 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
 	aliases										# Helps list the shortcuts that are currently available based on the plugins you have enabled
-	brew											# Adds aliases for common Homebrew commands
 	colored-man-pages					# Adds colors to man pages
 	command-not-found					# Suggests package installation if command not found
 	common-aliases						# Provides many useful aliases and functions
@@ -30,7 +29,6 @@ plugins=(
 	dirhistory        				# Adds keyboard shortcuts for directory navigation
 	git               				# Provides aliases and functions for Git
 	git-prompt        				# Adds Git status info to prompt
-	macos             				# Adds macOS-specific functions and aliases
 	sudo              				# Press ESC twice to add sudo to current command
 	tmux											# Provides aliases for tmux, the terminal multiplexer
 	web-search        				# Adds aliases for searching the web from terminal
@@ -40,6 +38,15 @@ plugins=(
 	zsh-bat										# Syntax highlighting using bat
 	zsh-syntax-highlighting		# Fish-like syntax highlighting
 )
+
+# macOS-only plugins. `brew` needs Homebrew, `macos` wraps Finder/Spotlight and
+# other Darwin-only commands — both are dead weight on a Linux box.
+if [[ "$OSTYPE" == darwin* ]]; then
+	plugins+=(
+		brew										# Adds aliases for common Homebrew commands
+		macos										# Adds macOS-specific functions and aliases
+	)
+fi
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=60"
 
@@ -79,47 +86,91 @@ if (( $+commands[thefuck] )); then
 fi
 
 # ---- navi: interactive cheatsheet. Ctrl-G pops a fuzzy help/insert menu ----
-export NAVI_PATH="$HOME/.dotfiles/.config/navi/cheats"
+export NAVI_PATH="${DOTFILES:-$HOME/.dotfiles}/.config/navi/cheats"
 (( $+commands[navi] )) && eval "$(navi widget zsh)"
 
 # ---- eza: modern ls (icons, git status, tree) ----
-alias ll='eza -l --icons --git --group-directories-first'
-alias la='eza -a --icons --group-directories-first'
-alias lla='eza -la --icons --git --group-directories-first'
-alias lt='eza --tree --level=2 --icons --group-directories-first'
-alias lta='eza --tree --level=2 -a --git --icons --group-directories-first'
+# Falls back to plain ls so `ll`/`la` still work on a box without eza.
+if (( $+commands[eza] )); then
+  alias ll='eza -l --icons --git --group-directories-first'
+  alias la='eza -a --icons --group-directories-first'
+  alias lla='eza -la --icons --git --group-directories-first'
+  alias lt='eza --tree --level=2 --icons --group-directories-first'
+  alias lta='eza --tree --level=2 -a --git --icons --group-directories-first'
+else
+  alias ll='ls -lh'
+  alias la='ls -A'
+  alias lla='ls -lhA'
+fi
 
 # =====================
 # LEARNING NUDGES
 # Remind to use the new tools when old habits fire (once per session each).
 # Delete this block once the muscle memory sticks.
+#
+# Interactive-only. Wrapping `ls`/`cd` unconditionally leaked the wrappers into
+# non-interactive shells (scripts, `zsh -c`, editor/agent tool calls), where the
+# helper was not always in scope — every command then printed
+# "command not found: _nudge" to stderr.
 # =====================
-typeset -gA _NUDGED
-_nudge() {
-  local key=$1 msg=$2
-  [[ -n ${_NUDGED[$key]} ]] && return
-  _NUDGED[$key]=1
-  print -P "%F{yellow}💡 ${msg}%f" >&2
-}
+# Must stay outside the block below: zsh parses a compound command in full
+# before running any of it, so an `unalias` inside the block comes too late —
+# the alias is still live when the `ls()` line is parsed, which errors with
+# "defining function based on alias `ls'".
 unalias ls cd 2>/dev/null
-ls() { _nudge ls "Modern: %Beza%b — aliases: ll (long+git), la (all), lt (tree)"; command ls "$@"; }
-cd() { _nudge cd "Modern: %Bz <dir>%b jumps by frecency, %Bzi%b picks interactively"; builtin cd "$@"; }
 
-# NVM
-export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+if [[ -o interactive ]]; then
+  typeset -gA _NUDGED
+  _nudge() {
+    local key=$1 msg=$2
+    [[ -n ${_NUDGED[$key]} ]] && return
+    _NUDGED[$key]=1
+    print -P "%F{yellow}💡 ${msg}%f" >&2
+  }
+  ls() { _nudge ls "Modern: %Beza%b — aliases: ll (long+git), la (all), lt (tree)"; command ls "$@"; }
+  cd() { _nudge cd "Modern: %Bz <dir>%b jumps by frecency, %Bzi%b picks interactively"; builtin cd "$@"; }
+fi
 
+# =====================
+# ENVIRONMENT
+# =====================
+
+export EDITOR=nvim
 export BAT_THEME="gruvbox-dark"
-
-EDITOR=nvim
 export PATH="$HOME/.local/bin:$PATH"
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/jankornienko/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/jankornienko/google-cloud-sdk/path.zsh.inc'; fi
+# ---- nvm ----
+# Checked in order: Homebrew (Apple Silicon, then Intel/Linuxbrew), then the
+# install-script location. The old config hardcoded the Apple Silicon path only.
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+for _nvm in \
+  "${HOMEBREW_PREFIX:-/opt/homebrew}/opt/nvm/nvm.sh" \
+  /usr/local/opt/nvm/nvm.sh \
+  "$NVM_DIR/nvm.sh"
+do
+  if [ -s "$_nvm" ]; then
+    \. "$_nvm"
+    [ -s "${_nvm:h}/etc/bash_completion.d/nvm" ] && \. "${_nvm:h}/etc/bash_completion.d/nvm"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    break
+  fi
+done
+unset _nvm
 
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/jankornienko/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/jankornienko/google-cloud-sdk/completion.zsh.inc'; fi
+# ---- Google Cloud SDK ----
+# Only if a tarball install is present. Homebrew's gcloud needs no sourcing.
+for _gcloud in "$HOME/google-cloud-sdk" "$HOME/.local/google-cloud-sdk"; do
+  if [ -f "$_gcloud/path.zsh.inc" ]; then
+    \. "$_gcloud/path.zsh.inc"
+    [ -f "$_gcloud/completion.zsh.inc" ] && \. "$_gcloud/completion.zsh.inc"
+    break
+  fi
+done
+unset _gcloud
 
-# Added by Antigravity
-export PATH="/Users/jankornienko/.antigravity/antigravity/bin:$PATH"
+# =====================
+# PER-MACHINE OVERRIDES
+# Anything host-specific (work paths, tokens, one-off PATH entries added by app
+# installers) belongs here, not in the tracked .zshrc. Untracked by design.
+# =====================
+[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
