@@ -4,7 +4,7 @@ Tracked so a new machine gets the same appearance and the same tooling.
 
 | File | Linked to | What it carries |
 | --- | --- | --- |
-| `settings.json` | `~/.claude/settings.json` | statusline, enabled plugins, marketplaces, theme, effort level, TUI mode |
+| `settings.json` | `~/.claude/settings.json` | statusline, enabled plugins, marketplaces, theme, effort level, TUI mode, attribution |
 | `statusline.sh` | `~/.claude/statusline.sh` | the `<<ctx:23%>> :: model :: [5h | wk]` HUD |
 | `keybindings.json` | `~/.claude/keybindings.json` | custom key bindings |
 | `../agents/skills/` | `~/.agents/skills` | personal skills (see below) |
@@ -12,6 +12,11 @@ Tracked so a new machine gets the same appearance and the same tooling.
 `statusLine.command` is `~/.claude/statusline.sh`, not an absolute path — it used
 to be `/Users/jankornienko/.claude/statusline.sh`, which meant no status line at
 all on Linux. The tilde form is what the Claude Code docs specify.
+
+`attribution` is set to empty strings for both `commit` and `pr`, which suppresses
+the automatic trailer in commit messages and the footer in pull request bodies.
+It was previously set on the workspace only, so commits made from the laptop
+carried a trailer and commits made from the workspace did not.
 
 ## Plugins are not tracked
 
