@@ -104,9 +104,6 @@ else
   brew install -q tree-sitter-cli || true
   # Skim, not Preview: it reloads the PDF on every rebuild and speaks SyncTeX.
   brew install -q --cask skim || true
-  # The in-editor PDF sidebar rasterises one page at a time with pdftoppm and
-  # hands the PNG to image.nvim, which shells out to the ImageMagick CLI.
-  brew install -q poppler imagemagick || true
 
   # Inverse search: Cmd-Shift-click in the PDF jumps Neovim to that source line.
   # Skim launches this command itself, outside the login shell, so the absolute

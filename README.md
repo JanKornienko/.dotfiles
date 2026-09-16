@@ -130,30 +130,16 @@ Hand-rolled config (no distro) on `lazy.nvim`. Web-first: TypeScript, JavaScript
 
 ### 📄 LaTeX (thesis writing)
 
-VimTeX keeps `latexmk` running in continuous mode, so the PDF updates a second
-or two after you stop typing — no manual rebuild.
+Open a `.tex` file and there is nothing to start: VimTeX launches `latexmk` in
+continuous mode by itself, auto-save writes the buffer as you type, and
+[Skim](https://skim-app.sourceforge.io/) reloads the PDF whenever a new one is
+written. So the window beside the editor follows the text a second or two
+behind, without a keystroke.
 
-Two ways to look at the result:
-
-- `\lp` opens a sidebar inside Neovim. `pdftoppm` rasterises the current page
-  and [image.nvim](https://github.com/3rd/image.nvim) draws it over the window;
-  `j`/`k` turn pages. The split sizes itself to the page's aspect ratio, so the
-  page fills it rather than sitting letterboxed, and it redraws only when the
-  PDF actually changed — latexmk recompiles on every keystroke via auto-save,
-  and redrawing an identical page just makes the preview blink.
-- `\lv` opens [Skim](https://skim-app.sourceforge.io/), the only one of the two
-  that speaks SyncTeX: `\lv` moves Skim to the cursor line, ⌘⇧-click moves
-  Neovim back to the clicked line.
-
-**The sidebar refuses to open inside tmux**, and that is a safety measure
-rather than a missing feature. A PDF page is drawn with kitty graphics escape
-sequences: Neovim's own `:terminal` drops them (libvterm) and tmux does not
-implement the protocol at all ([tmux#4902](https://github.com/tmux/tmux/issues/4902)).
-Worse, `allow-passthrough` forwards the request outwards but hands the
-terminal's reply back to whichever pane is *active* — the editor — where it
-arrives as keystrokes and is written into the document. It has twice inserted
-text like `31;OK` into a `.tex` file, once eating the closing brace of
-`\end{document}` and breaking the build. Under tmux, use `\lv` and Skim.
+Skim also speaks SyncTeX, in both directions: `\lv` scrolls it to the line you
+are writing, ⌘⇧-click on the page moves Neovim to the source behind it. It is
+deliberately never raised to the front on its own — VimTeX syncs after every
+compile, and with auto-save that would steal focus mid-sentence.
 
 Prose is written in Czech: `cs` + `en_us` spell checking is on in every `.tex`
 buffer, the Czech dictionary is vendored in `.config/nvim/spell/`, and words
@@ -161,8 +147,7 @@ added with `zg` land in `spell/cs.utf-8.add` so they sync with the repo.
 
 **Local leader:** `\` — all LaTeX maps hang off `\l`
 
-- `\ll` - Start/stop continuous compilation
-- `\lp` - Toggle the PDF sidebar (`j`/`k` pages, `r` refresh, `q` close)
+- `\ll` - Stop/restart continuous compilation (it is already running)
 - `\lv` - Forward search: move Skim to the cursor line
 - `⌘⇧-click` in Skim - Inverse search: move Neovim to the clicked line
 - `\lt` - Table of contents · `\le` - Errors · `\lw` - Word count
@@ -174,8 +159,8 @@ in the thesis repo. `texlab` supplies `\cite`/`\ref` completion and `chktex`
 diagnostics; it does not build — VimTeX does.
 
 **Installed by `install.sh` (macOS):** `texlive` (full distribution, latexmk +
-biber), `poppler` and `imagemagick` for the sidebar, the `skim` cask, and the
-Skim SyncTeX preferences wiring inverse search to `nvim`.
+biber), the `skim` cask, and the Skim SyncTeX preferences wiring inverse search
+to `nvim`.
 
 ## 📦 Installation
 

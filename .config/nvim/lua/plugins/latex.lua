@@ -1,13 +1,8 @@
 -- LaTeX: VimTeX drives latexmk, the PDF shows up next to the editor.
 --
--- Two viewers, because neither does the other's job:
---   \lp  a sidebar inside Neovim — image.nvim draws the page over a window
---   \lv  Skim — the only one that speaks SyncTeX, so the only one that can
---        jump between a source line and its place on the page
--- Neither works through tmux: it has no kitty graphics support (tmux#4902),
--- and its passthrough returns the terminal's replies to whatever pane is
--- active, which types them into the document as text. Run nvim directly in
--- iTerm2 for the sidebar; see lua/latex_preview.lua.
+-- Skim shows the result in its own window and reloads itself whenever latexmk
+-- writes a new PDF. Combined with auto-save, that means the page updates a
+-- second or so after you stop typing, without leaving the editor.
 --
 -- Why VimTeX and not the texlab build: texlab rebuilds on save only, VimTeX
 -- keeps latexmk running in continuous mode, so the PDF refreshes while typing.
@@ -45,7 +40,6 @@ end
 return {
   {
     "lervag/vimtex",
-    dependencies = { "3rd/image.nvim" },
     -- VimTeX must not be lazy-loaded (upstream requirement): its ftplugin has
     -- to be on the runtimepath before the first *.tex file is read.
     lazy = false,
@@ -56,8 +50,11 @@ return {
     init = function()
       -- ---------------------------------------------------------- viewer
       vim.g.vimtex_view_method = "skim"
-      vim.g.vimtex_view_skim_sync = 1 -- forward search after every compile
-      vim.g.vimtex_view_skim_activate = 1 -- raise Skim on \lv
+      vim.g.vimtex_view_skim_sync = 1 -- scroll Skim to the line being written
+      -- Deliberately 0: VimTeX runs a forward search after *every* compile, and
+      -- auto-save makes that every couple of seconds. With activate on, Skim
+      -- would take the focus away mid-sentence, over and over.
+      vim.g.vimtex_view_skim_activate = 0
       vim.g.vimtex_view_skim_reading_bar = 1 -- highlight the synced line
 
       -- ---------------------------------------------------------- compiler
@@ -122,44 +119,34 @@ return {
       vim.fn.mkdir(spelldir, "p")
       vim.opt.spellfile = spelldir .. "/cs.utf-8.add"
 
-      require("latex_preview").attach_autocmds()
+      -- Start latexmk as soon as a document is opened. The whole point of the
+      -- setup is to type and watch the page follow; having to remember \ll
+      -- first defeats it. VimtexEventInitPost fires once per document, after
+      -- VimTeX has worked out the main file, so includes do not each spawn a
+      -- compiler. \ll still toggles it off.
+      vim.api.nvim_create_autocmd("User", {
+        group = vim.api.nvim_create_augroup("tex_autocompile", { clear = true }),
+        pattern = "VimtexEventInitPost",
+        callback = function()
+          -- is_running() comes back as a Lua boolean, not the 0/1 a Vimscript
+          -- predicate suggests, so both shapes are accepted rather than
+          -- compared against one of them.
+          local ok, running = pcall(vim.fn.eval, "b:vimtex.compiler.is_running()")
+          local busy = running == true or running == 1
+          if ok and not busy then
+            pcall(vim.fn["vimtex#compiler#start"])
+          end
+        end,
+      })
     end,
     keys = {
       { "<localleader>ll", "<cmd>VimtexCompile<cr>", ft = "tex", desc = "LaTeX: toggle continuous compile" },
       { "<localleader>lv", "<cmd>VimtexView<cr>", ft = "tex", desc = "LaTeX: forward search to cursor (Skim)" },
-      {
-        "<localleader>lp",
-        function()
-          require("latex_preview").toggle()
-        end,
-        ft = "tex",
-        desc = "LaTeX: toggle PDF sidebar",
-      },
       { "<localleader>lt", "<cmd>VimtexTocToggle<cr>", ft = "tex", desc = "LaTeX: table of contents" },
       { "<localleader>le", "<cmd>VimtexErrors<cr>", ft = "tex", desc = "LaTeX: errors" },
       { "<localleader>lc", "<cmd>VimtexClean<cr>", ft = "tex", desc = "LaTeX: clean aux files" },
       { "<localleader>ls", "<cmd>VimtexStop<cr>", ft = "tex", desc = "LaTeX: stop compiler" },
       { "<localleader>lw", "<cmd>VimtexCountWords<cr>", ft = "tex", desc = "LaTeX: word count" },
-    },
-  },
-
-  {
-    "3rd/image.nvim",
-    lazy = true,
-    opts = {
-      backend = "kitty", -- iTerm2 speaks this protocol too, despite the name
-      -- Avoids the ImageMagick luarock, which needs a luarocks toolchain on
-      -- every machine; the CLI is already a poppler/texlive neighbour.
-      processor = "magick_cli",
-      integrations = {
-        markdown = { enabled = false },
-        neorg = { enabled = false },
-        html = { enabled = false },
-        css = { enabled = false },
-      },
-      window_overlap_clear_enabled = true,
-      editor_only_render_when_focused = true,
-      tmux_show_only_in_active_window = true,
     },
   },
 }
