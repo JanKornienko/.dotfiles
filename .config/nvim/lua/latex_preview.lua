@@ -15,10 +15,14 @@ local state = {
   win = nil,
   buf = nil,
   image = nil,
+  slot = "a",
   png = nil,
   pdf = nil,
+  stamp = nil,
+  aspect = nil,
   page = 1,
   pages = 1,
+  fitting = false,
 }
 
 local DPI = 150
@@ -45,18 +49,24 @@ local function pdf_path()
   return path
 end
 
-local function page_count(pdf)
+-- Page count and page shape in one call, since both come from the same header.
+local function page_geometry(pdf)
+  local pages, aspect = 1, nil
   local out = vim.fn.systemlist({ "pdfinfo", pdf })
   if vim.v.shell_error ~= 0 then
-    return 1
+    return pages, aspect
   end
   for _, line in ipairs(out) do
     local n = line:match("^Pages:%s+(%d+)")
     if n then
-      return tonumber(n)
+      pages = tonumber(n)
+    end
+    local w, h = line:match("^Page size:%s+([%d%.]+) x ([%d%.]+)")
+    if w and h and tonumber(h) > 0 then
+      aspect = tonumber(w) / tonumber(h)
     end
   end
-  return 1
+  return pages, aspect
 end
 
 -- The file name carries the PDF's mtime because image.nvim caches by path: a
@@ -93,44 +103,71 @@ local function rasterize(pdf, page)
   return png
 end
 
-local function clear_image()
-  if state.image then
-    pcall(function()
-      state.image:clear()
-    end)
-    state.image = nil
+-- Match the split's width to the shape of the page. The image keeps its aspect
+-- ratio, so a portrait page in a window of any other shape is letterboxed —
+-- which is what "not filling the split" looks like. Sizing the window to the
+-- page instead means the two agree and the page fills it edge to edge.
+local function fit_window()
+  if not is_open() or not state.aspect or state.fitting then
+    return
   end
+  local ok, term = pcall(require, "image.utils.term")
+  if not ok then
+    return
+  end
+  local size = term.get_size()
+  if not size or not size.cell_width or size.cell_width == 0 or size.cell_height == 0 then
+    return
+  end
+
+  local rows = vim.api.nvim_win_get_height(state.win)
+  local cols = math.floor((rows * size.cell_height * state.aspect) / size.cell_width + 0.5)
+  -- Never squeeze the source below roughly a third of the screen.
+  cols = math.max(20, math.min(cols, math.floor(vim.o.columns * 0.66)))
+
+  state.fitting = true
+  pcall(vim.api.nvim_win_set_width, state.win, cols)
+  state.fitting = false
 end
 
 local function draw()
   if not is_open() or not state.png then
     return
   end
-  clear_image()
 
   local ok, image = pcall(require, "image")
   if not ok then
     return notify("image.nvim is not available")
   end
 
-  -- No explicit width or height: image.nvim then scales the page to fit the
-  -- window while keeping its aspect ratio. The two percentages have to be
-  -- given because the plugin caps images at half the window height by default
-  -- (lua/image/init.lua), which leaves a thesis page floating in empty space.
+  -- Two alternating ids so the new page can be put on screen before the old
+  -- one is taken off. Clearing first leaves the window blank for a frame,
+  -- which during continuous compilation reads as a constant blink.
+  local previous = state.image
+  state.slot = state.slot == "a" and "b" or "a"
+
   local img = image.from_file(state.png, {
-    id = "latex-preview",
+    id = "latex-preview-" .. state.slot,
     window = state.win,
     buffer = state.buf,
     x = 0,
     y = 0,
+    -- Both percentages have to be given: the plugin caps images at half the
+    -- window height by default (lua/image/init.lua).
     max_width_window_percentage = 100,
     max_height_window_percentage = 100,
   })
   if not img then
     return notify("could not build the image")
   end
-  state.image = img
+
   img:render()
+  state.image = img
+  if previous then
+    pcall(function()
+      previous:clear()
+    end)
+  end
 
   if state.buf and vim.api.nvim_buf_is_valid(state.buf) then
     vim.api.nvim_buf_set_name(state.buf, string.format("PDF %d/%d", state.page, state.pages))
@@ -158,8 +195,9 @@ function M.prev_page()
   show_page(state.page - 1)
 end
 
--- Re-read the PDF after a rebuild: the page count can change, and the current
--- page may no longer exist if the document got shorter.
+-- Called after every successful compile. latexmk runs continuously and
+-- auto-save fires on TextChanged, so this is hit constantly while typing;
+-- redrawing an unchanged page would be a visible blink for nothing.
 function M.refresh()
   if not is_open() or not state.pdf then
     return
@@ -167,8 +205,31 @@ function M.refresh()
   if vim.fn.filereadable(state.pdf) == 0 then
     return
   end
-  state.pages = page_count(state.pdf)
+
+  local stamp = vim.fn.getftime(state.pdf)
+  if stamp == state.stamp then
+    return
+  end
+  state.stamp = stamp
+
+  -- The page count can change, and the current page may no longer exist if the
+  -- document got shorter.
+  state.pages, state.aspect = page_geometry(state.pdf)
+  fit_window()
   show_page(state.page)
+end
+
+local function forget_window()
+  state.win, state.buf, state.png = nil, nil, nil
+end
+
+local function clear_image()
+  if state.image then
+    pcall(function()
+      state.image:clear()
+    end)
+    state.image = nil
+  end
 end
 
 function M.close()
@@ -176,7 +237,7 @@ function M.close()
   if is_open() then
     vim.api.nvim_win_close(state.win, true)
   end
-  state.win, state.buf, state.png = nil, nil, nil
+  forget_window()
 end
 
 local function setup_buffer(buf)
@@ -228,11 +289,13 @@ function M.open()
   wo.spell = false
 
   state.pdf = pdf
-  state.pages = page_count(pdf)
+  state.stamp = vim.fn.getftime(pdf)
+  state.pages, state.aspect = page_geometry(pdf)
   state.page = 1
 
   -- Typing continues in the source; the preview is looked at, not worked in.
   vim.api.nvim_set_current_win(source_win)
+  fit_window()
   show_page(1)
 end
 
@@ -260,7 +323,10 @@ function M.attach_autocmds()
   vim.api.nvim_create_autocmd({ "VimResized", "WinResized" }, {
     group = group,
     callback = function()
+      -- fit_window resizes a window, which raises WinResized again; the guard
+      -- inside it keeps that from recursing.
       if is_open() then
+        fit_window()
         draw()
       end
     end,
@@ -271,7 +337,7 @@ function M.attach_autocmds()
     callback = function(ev)
       if is_open() and tonumber(ev.match) == state.win then
         clear_image()
-        state.win, state.buf, state.png = nil, nil, nil
+        forget_window()
       end
     end,
   })

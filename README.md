@@ -137,7 +137,10 @@ Two ways to look at the result:
 
 - `\lp` opens a sidebar inside Neovim. `pdftoppm` rasterises the current page
   and [image.nvim](https://github.com/3rd/image.nvim) draws it over the window;
-  `j`/`k` turn pages, and it redraws itself after every successful compile.
+  `j`/`k` turn pages. The split sizes itself to the page's aspect ratio, so the
+  page fills it rather than sitting letterboxed, and it redraws only when the
+  PDF actually changed — latexmk recompiles on every keystroke via auto-save,
+  and redrawing an identical page just makes the preview blink.
 - `\lv` opens [Skim](https://skim-app.sourceforge.io/), the only one of the two
   that speaks SyncTeX: `\lv` moves Skim to the cursor line, ⌘⇧-click moves
   Neovim back to the clicked line.
