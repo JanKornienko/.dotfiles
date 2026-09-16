@@ -128,6 +128,33 @@ Hand-rolled config (no distro) on `lazy.nvim`. Web-first: TypeScript, JavaScript
 
 [View all key bindings and plugins →](https://github.com/jankornienko/.dotfiles/wiki/Neovim)
 
+### 📄 LaTeX (thesis writing)
+
+Neovim on the left, [Skim](https://skim-app.sourceforge.io/) on the right. VimTeX
+keeps `latexmk` running in continuous mode, so the PDF updates a second or two
+after you stop typing — no manual rebuild.
+
+Prose is written in Czech: `cs` + `en_us` spell checking is on in every `.tex`
+buffer, the Czech dictionary is vendored in `.config/nvim/spell/`, and words
+added with `zg` land in `spell/cs.utf-8.add` so they sync with the repo.
+
+**Local leader:** `\` — all LaTeX maps hang off `\l`
+
+- `\ll` - Start/stop continuous compilation
+- `\lv` - Forward search: move Skim to the cursor line
+- `⌘⇧-click` in Skim - Inverse search: move Neovim to the clicked line
+- `\lt` - Table of contents · `\le` - Errors · `\lw` - Word count
+- `\lc` - Clean aux files · `]]` (insert) - Close current environment
+- `zg` - Add word to the Czech dictionary · `z=` - Suggestions
+
+Build artefacts go to `build/` next to the document, so only sources are left
+in the thesis repo. `texlab` supplies `\cite`/`\ref` completion and `chktex`
+diagnostics; it does not build — VimTeX does.
+
+**Installed by `install.sh` (macOS):** `texlive` (full distribution, latexmk +
+biber), `skim` cask, and the Skim SyncTeX preferences wiring inverse search to
+`nvim`.
+
 ## 📦 Installation
 
 ```bash
