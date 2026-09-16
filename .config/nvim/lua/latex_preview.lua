@@ -262,6 +262,17 @@ function M.open()
     return
   end
 
+  -- Refused under tmux, not merely unsupported. tmux has no kitty graphics
+  -- support (tmux#4902), and its passthrough hands the terminal's replies to
+  -- whichever pane is active — the editor. They arrive as keystrokes and are
+  -- written into the document: observed twice, once eating the closing brace
+  -- of \end{document} and breaking the build. A preview is not worth
+  -- corrupting the thesis, so under tmux there is no preview.
+  if vim.env.TMUX then
+    return notify("No sidebar under tmux — the terminal's replies get typed "
+      .. "into the document. Use \\lv (Skim), or run nvim outside tmux.")
+  end
+
   local pdf, err = pdf_path()
   if not pdf then
     return notify(err)

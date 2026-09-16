@@ -145,13 +145,15 @@ Two ways to look at the result:
   that speaks SyncTeX: `\lv` moves Skim to the cursor line, ⌘⇧-click moves
   Neovim back to the clicked line.
 
-**The sidebar needs Neovim running directly in iTerm2, not inside tmux.** A PDF
-page is drawn with kitty graphics escape sequences. Neovim's own `:terminal`
-drops them (libvterm), and tmux does not implement the protocol at all
-([tmux#4902](https://github.com/tmux/tmux/issues/4902)) — worse, its
-`allow-passthrough` forwards the request outwards but hands the terminal's
-reply to whichever pane is active, which types it into the document as literal
-text. Under tmux, use `\lv`.
+**The sidebar refuses to open inside tmux**, and that is a safety measure
+rather than a missing feature. A PDF page is drawn with kitty graphics escape
+sequences: Neovim's own `:terminal` drops them (libvterm) and tmux does not
+implement the protocol at all ([tmux#4902](https://github.com/tmux/tmux/issues/4902)).
+Worse, `allow-passthrough` forwards the request outwards but hands the
+terminal's reply back to whichever pane is *active* — the editor — where it
+arrives as keystrokes and is written into the document. It has twice inserted
+text like `31;OK` into a `.tex` file, once eating the closing brace of
+`\end{document}` and breaking the build. Under tmux, use `\lv` and Skim.
 
 Prose is written in Czech: `cs` + `en_us` spell checking is on in every `.tex`
 buffer, the Czech dictionary is vendored in `.config/nvim/spell/`, and words
