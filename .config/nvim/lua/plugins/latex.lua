@@ -1,8 +1,13 @@
 -- LaTeX: VimTeX drives latexmk, the PDF shows up next to the editor.
 --
--- Skim on \lv is the viewer that works. An in-terminal one is not available:
--- Neovim's :terminal runs on libvterm and tmux has no kitty graphics support
--- at all, so neither can draw a PDF page. See toggle_preview below.
+-- Two viewers, because neither does the other's job:
+--   \lp  a sidebar inside Neovim — image.nvim draws the page over a window
+--   \lv  Skim — the only one that speaks SyncTeX, so the only one that can
+--        jump between a source line and its place on the page
+-- Neither works through tmux: it has no kitty graphics support (tmux#4902),
+-- and its passthrough returns the terminal's replies to whatever pane is
+-- active, which types them into the document as text. Run nvim directly in
+-- iTerm2 for the sidebar; see lua/latex_preview.lua.
 --
 -- Why VimTeX and not the texlab build: texlab rebuilds on save only, VimTeX
 -- keeps latexmk running in continuous mode, so the PDF refreshes while typing.
@@ -10,76 +15,10 @@
 --
 -- Written in Czech, so spell checking, hyphenation and conceal all assume cs.
 
--- Path of the PDF latexmk produces for the current document. VimTeX knows it
--- (it accounts for out_dir), but only through a Vimscript funcref.
-local function pdf_path()
-  if not vim.b.vimtex then
-    return nil, "not a VimTeX buffer"
-  end
-  local ok, path = pcall(vim.fn.eval, 'b:vimtex.compiler.get_file("pdf")')
-  if not ok or type(path) ~= "string" then
-    return nil, "could not work out the PDF path"
-  end
-  return path
-end
-
--- A tdf pane under tmux is not merely broken, it is destructive, so the
--- preview refuses to open one. tmux does not implement the kitty graphics
--- protocol (tmux#4902), and allow-passthrough only forwards bytes outwards:
--- the terminal's reply comes back to whichever pane is *active*. tdf therefore
--- waits forever for an answer it never receives, while the answer is typed as
--- literal text into the document being edited — observed as "=31;OK" landing
--- in the middle of a .tex file.
-local function toggle_preview()
-  local warn = function(msg)
-    vim.notify(msg, vim.log.levels.WARN, { title = "LaTeX preview" })
-  end
-
-  if vim.env.TMUX then
-    return warn("No PDF pane under tmux: tmux cannot render kitty graphics, "
-      .. "and the terminal's replies get typed into the buffer. Use \\lv (Skim).")
-  end
-
-  local pdf, err = pdf_path()
-  if not pdf then
-    return warn(err)
-  end
-  if vim.fn.filereadable(pdf) == 0 then
-    return warn("No PDF yet — start the compiler with \\ll first.")
-  end
-  return warn("In-terminal preview is not wired up outside tmux yet. Use \\lv (Skim).")
-end
-
-local function tex_buffer_setup()
-  local opt = vim.opt_local
-
-  -- Prose, not code: wrap at the window edge on word boundaries and keep the
-  -- indent, instead of the hard `nowrap` used everywhere else.
-  opt.wrap = true
-  opt.linebreak = true
-  opt.breakindent = true
-  opt.textwidth = 0
-
-  -- Wrapped lines make j/k jump whole paragraphs; move by screen line instead.
-  vim.keymap.set({ "n", "x" }, "j", "gj", { buffer = true, desc = "Down (screen line)" })
-  vim.keymap.set({ "n", "x" }, "k", "gk", { buffer = true, desc = "Up (screen line)" })
-
-  -- VimTeX conceals \alpha, \ldots, math delimiters etc. Needs conceallevel 2
-  -- and concealcursor unset, or the line under the cursor renders differently
-  -- from the rest and the text jumps as you move.
-  opt.conceallevel = 2
-  opt.concealcursor = ""
-
-  -- Czech first, English second: both dictionaries are consulted, so English
-  -- terms in the text are not flagged. cs.utf-8.spl is vendored in spell/.
-  opt.spell = true
-  opt.spelllang = { "cs", "en_us" }
-  opt.spelloptions = "camel"
-end
-
 return {
   {
     "lervag/vimtex",
+    dependencies = { "3rd/image.nvim" },
     -- VimTeX must not be lazy-loaded (upstream requirement): its ftplugin has
     -- to be on the runtimepath before the first *.tex file is read.
     lazy = false,
@@ -155,16 +94,45 @@ return {
       local spelldir = vim.fn.stdpath("config") .. "/spell"
       vim.fn.mkdir(spelldir, "p")
       vim.opt.spellfile = spelldir .. "/cs.utf-8.add"
+
+      require("latex_preview").attach_autocmds()
     end,
     keys = {
       { "<localleader>ll", "<cmd>VimtexCompile<cr>", ft = "tex", desc = "LaTeX: toggle continuous compile" },
       { "<localleader>lv", "<cmd>VimtexView<cr>", ft = "tex", desc = "LaTeX: forward search to cursor (Skim)" },
-      { "<localleader>lp", toggle_preview, ft = "tex", desc = "LaTeX: toggle PDF pane (tmux + tdf)" },
+      {
+        "<localleader>lp",
+        function()
+          require("latex_preview").toggle()
+        end,
+        ft = "tex",
+        desc = "LaTeX: toggle PDF sidebar",
+      },
       { "<localleader>lt", "<cmd>VimtexTocToggle<cr>", ft = "tex", desc = "LaTeX: table of contents" },
       { "<localleader>le", "<cmd>VimtexErrors<cr>", ft = "tex", desc = "LaTeX: errors" },
       { "<localleader>lc", "<cmd>VimtexClean<cr>", ft = "tex", desc = "LaTeX: clean aux files" },
       { "<localleader>ls", "<cmd>VimtexStop<cr>", ft = "tex", desc = "LaTeX: stop compiler" },
       { "<localleader>lw", "<cmd>VimtexCountWords<cr>", ft = "tex", desc = "LaTeX: word count" },
+    },
+  },
+
+  {
+    "3rd/image.nvim",
+    lazy = true,
+    opts = {
+      backend = "kitty", -- iTerm2 speaks this protocol too, despite the name
+      -- Avoids the ImageMagick luarock, which needs a luarocks toolchain on
+      -- every machine; the CLI is already a poppler/texlive neighbour.
+      processor = "magick_cli",
+      integrations = {
+        markdown = { enabled = false },
+        neorg = { enabled = false },
+        html = { enabled = false },
+        css = { enabled = false },
+      },
+      window_overlap_clear_enabled = true,
+      editor_only_render_when_focused = true,
+      tmux_show_only_in_active_window = true,
     },
   },
 }

@@ -133,16 +133,22 @@ Hand-rolled config (no distro) on `lazy.nvim`. Web-first: TypeScript, JavaScript
 VimTeX keeps `latexmk` running in continuous mode, so the PDF updates a second
 or two after you stop typing — no manual rebuild.
 
-`\lv` opens it in [Skim](https://skim-app.sourceforge.io/), which also speaks
-SyncTeX: `\lv` moves Skim to the cursor line, ⌘⇧-click moves Neovim to the
-clicked line.
+Two ways to look at the result:
 
-There is deliberately no in-terminal viewer. Neovim's `:terminal` runs on
-libvterm, which drops the kitty graphics escapes a terminal PDF viewer needs,
-and tmux does not implement that protocol either ([tmux#4902](https://github.com/tmux/tmux/issues/4902)).
-Under tmux it is worse than unsupported: `allow-passthrough` forwards the
-request but the terminal's reply goes to whichever pane is active, so the
-viewer hangs and the reply is typed into the document as literal text.
+- `\lp` opens a sidebar inside Neovim. `pdftoppm` rasterises the current page
+  and [image.nvim](https://github.com/3rd/image.nvim) draws it over the window;
+  `j`/`k` turn pages, and it redraws itself after every successful compile.
+- `\lv` opens [Skim](https://skim-app.sourceforge.io/), the only one of the two
+  that speaks SyncTeX: `\lv` moves Skim to the cursor line, ⌘⇧-click moves
+  Neovim back to the clicked line.
+
+**The sidebar needs Neovim running directly in iTerm2, not inside tmux.** A PDF
+page is drawn with kitty graphics escape sequences. Neovim's own `:terminal`
+drops them (libvterm), and tmux does not implement the protocol at all
+([tmux#4902](https://github.com/tmux/tmux/issues/4902)) — worse, its
+`allow-passthrough` forwards the request outwards but hands the terminal's
+reply to whichever pane is active, which types it into the document as literal
+text. Under tmux, use `\lv`.
 
 Prose is written in Czech: `cs` + `en_us` spell checking is on in every `.tex`
 buffer, the Czech dictionary is vendored in `.config/nvim/spell/`, and words
@@ -151,6 +157,7 @@ added with `zg` land in `spell/cs.utf-8.add` so they sync with the repo.
 **Local leader:** `\` — all LaTeX maps hang off `\l`
 
 - `\ll` - Start/stop continuous compilation
+- `\lp` - Toggle the PDF sidebar (`j`/`k` pages, `r` refresh, `q` close)
 - `\lv` - Forward search: move Skim to the cursor line
 - `⌘⇧-click` in Skim - Inverse search: move Neovim to the clicked line
 - `\lt` - Table of contents · `\le` - Errors · `\lw` - Word count
@@ -162,8 +169,8 @@ in the thesis repo. `texlab` supplies `\cite`/`\ref` completion and `chktex`
 diagnostics; it does not build — VimTeX does.
 
 **Installed by `install.sh` (macOS):** `texlive` (full distribution, latexmk +
-biber), the `skim` cask, and the Skim SyncTeX preferences wiring inverse search
-to `nvim`.
+biber), `poppler` and `imagemagick` for the sidebar, the `skim` cask, and the
+Skim SyncTeX preferences wiring inverse search to `nvim`.
 
 ## 📦 Installation
 
