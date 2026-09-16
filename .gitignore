@@ -7,3 +7,7 @@ CLAUDE.md
 *.local
 *.bak
 .config/gh/hosts.yml
+
+# Compiled form of the personal spell dictionary — Neovim regenerates it from
+# the tracked .add file on first use, so it would only churn in diffs.
+*.add.spl

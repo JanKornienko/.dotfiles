@@ -12,6 +12,7 @@ return {
     opts = {
       ensure_installed = {
         "bash",
+        "bibtex",
         "css",
         "scss",
         "html",
@@ -34,7 +35,14 @@ return {
         "yaml",
       },
       auto_install = true,
-      highlight = { enable = true },
+      -- The latex parser is deliberately excluded, not merely left out of
+      -- ensure_installed: auto_install would otherwise retry it on every .tex
+      -- buffer and fail every time, because this branch calls `tree-sitter
+      -- generate --no-bindings` and the CLI dropped that flag in 0.27. Nothing
+      -- is lost — VimTeX owns tex syntax, folds and textobjects, and its
+      -- conceal only works when treesitter highlighting stays out of the way.
+      ignore_install = { "latex" },
+      highlight = { enable = true, disable = { "latex" } },
       indent = { enable = true },
       incremental_selection = {
         enable = true,
