@@ -68,6 +68,15 @@ local function rasterize(pdf, page)
   local prefix = string.format("%s/%s-%d-%d", cache_dir, key, stamp, page)
   local png = prefix .. ".png"
 
+  -- Every rebuild starts a new generation of page images. Without this the
+  -- cache would keep one PNG per page per compile, which over a thesis is
+  -- thousands of files nobody will ever look at again.
+  for _, stale in ipairs(vim.fn.glob(cache_dir .. "/" .. key .. "-*.png", false, true)) do
+    if not stale:match("^" .. vim.pesc(cache_dir .. "/" .. key .. "-" .. stamp .. "-")) then
+      vim.fn.delete(stale)
+    end
+  end
+
   if vim.fn.filereadable(png) == 0 then
     -- -singlefile keeps the name predictable; without it pdftoppm appends a
     -- zero-padded page number whose width depends on the page count.
@@ -104,18 +113,18 @@ local function draw()
     return notify("image.nvim is not available")
   end
 
-  local width = vim.api.nvim_win_get_width(state.win)
-  local height = vim.api.nvim_win_get_height(state.win)
-
-  -- Only the height is constrained. Giving both would stretch the page, and a
-  -- thesis page is taller than it is wide, so height is the binding dimension.
+  -- No explicit width or height: image.nvim then scales the page to fit the
+  -- window while keeping its aspect ratio. The two percentages have to be
+  -- given because the plugin caps images at half the window height by default
+  -- (lua/image/init.lua), which leaves a thesis page floating in empty space.
   local img = image.from_file(state.png, {
     id = "latex-preview",
     window = state.win,
     buffer = state.buf,
     x = 0,
     y = 0,
-    height = height,
+    max_width_window_percentage = 100,
+    max_height_window_percentage = 100,
   })
   if not img then
     return notify("could not build the image")

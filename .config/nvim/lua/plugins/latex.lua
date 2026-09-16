@@ -15,6 +15,33 @@
 --
 -- Written in Czech, so spell checking, hyphenation and conceal all assume cs.
 
+local function tex_buffer_setup()
+  local opt = vim.opt_local
+
+  -- Prose, not code: wrap at the window edge on word boundaries and keep the
+  -- indent, instead of the hard `nowrap` used everywhere else.
+  opt.wrap = true
+  opt.linebreak = true
+  opt.breakindent = true
+  opt.textwidth = 0
+
+  -- Wrapped lines make j/k jump whole paragraphs; move by screen line instead.
+  vim.keymap.set({ "n", "x" }, "j", "gj", { buffer = true, desc = "Down (screen line)" })
+  vim.keymap.set({ "n", "x" }, "k", "gk", { buffer = true, desc = "Up (screen line)" })
+
+  -- VimTeX conceals \alpha, \ldots, math delimiters etc. Needs conceallevel 2
+  -- and concealcursor unset, or the line under the cursor renders differently
+  -- from the rest and the text jumps as you move.
+  opt.conceallevel = 2
+  opt.concealcursor = ""
+
+  -- Czech first, English second: both dictionaries are consulted, so English
+  -- terms in the text are not flagged. cs.utf-8.spl is vendored in spell/.
+  opt.spell = true
+  opt.spelllang = { "cs", "en_us" }
+  opt.spelloptions = "camel"
+end
+
 return {
   {
     "lervag/vimtex",
