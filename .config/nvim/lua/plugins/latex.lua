@@ -1,11 +1,8 @@
 -- LaTeX: VimTeX drives latexmk, the PDF shows up next to the editor.
 --
--- Two viewers, because neither does the other's job:
---   \lp  tdf in a tmux pane — stays in the terminal, reloads on every rebuild
---   \lv  Skim — the only one that speaks SyncTeX, so the only one that can
---        jump between a source line and its place on the page
--- The PDF cannot live in a Neovim split: :terminal runs on libvterm, which
--- drops the kitty graphics escapes that any terminal PDF viewer needs.
+-- Skim on \lv is the viewer that works. An in-terminal one is not available:
+-- Neovim's :terminal runs on libvterm and tmux has no kitty graphics support
+-- at all, so neither can draw a PDF page. See toggle_preview below.
 --
 -- Why VimTeX and not the texlab build: texlab rebuilds on save only, VimTeX
 -- keeps latexmk running in continuous mode, so the PDF refreshes while typing.
@@ -26,36 +23,21 @@ local function pdf_path()
   return path
 end
 
--- Pane id of a tdf already running in this tmux window, if any.
-local function tdf_pane()
-  local panes = vim.fn.systemlist({ "tmux", "list-panes", "-F", "#{pane_id} #{pane_current_command}" })
-  if vim.v.shell_error ~= 0 then
-    return nil
-  end
-  for _, line in ipairs(panes) do
-    local id, cmd = line:match("^(%%%d+)%s+(%S+)$")
-    if cmd == "tdf" then
-      return id
-    end
-  end
-  return nil
-end
-
--- Toggle the PDF pane beside the editor. Opening does not steal focus (-d),
--- so compile, preview and typing never interrupt each other.
+-- A tdf pane under tmux is not merely broken, it is destructive, so the
+-- preview refuses to open one. tmux does not implement the kitty graphics
+-- protocol (tmux#4902), and allow-passthrough only forwards bytes outwards:
+-- the terminal's reply comes back to whichever pane is *active*. tdf therefore
+-- waits forever for an answer it never receives, while the answer is typed as
+-- literal text into the document being edited — observed as "=31;OK" landing
+-- in the middle of a .tex file.
 local function toggle_preview()
   local warn = function(msg)
     vim.notify(msg, vim.log.levels.WARN, { title = "LaTeX preview" })
   end
 
-  if not vim.env.TMUX then
-    return warn("Not inside tmux — use \\lv to open the PDF in Skim instead.")
-  end
-
-  local existing = tdf_pane()
-  if existing then
-    vim.system({ "tmux", "kill-pane", "-t", existing })
-    return
+  if vim.env.TMUX then
+    return warn("No PDF pane under tmux: tmux cannot render kitty graphics, "
+      .. "and the terminal's replies get typed into the buffer. Use \\lv (Skim).")
   end
 
   local pdf, err = pdf_path()
@@ -65,10 +47,7 @@ local function toggle_preview()
   if vim.fn.filereadable(pdf) == 0 then
     return warn("No PDF yet — start the compiler with \\ll first.")
   end
-
-  -- tmux joins the trailing arguments into one shell command, so the path is
-  -- escaped here rather than passed as a separate argv entry.
-  vim.system({ "tmux", "split-window", "-h", "-l", "50%", "-d", "tdf " .. vim.fn.shellescape(pdf) })
+  return warn("In-terminal preview is not wired up outside tmux yet. Use \\lv (Skim).")
 end
 
 local function tex_buffer_setup()
