@@ -23,17 +23,6 @@ return {
         bashls = {},
         yamlls = {},
         marksman = {},
-        texlab = {
-          settings = {
-            texlab = {
-              -- VimTeX owns compilation (latexmk in continuous mode); a second
-              -- builder on save would race it over the same aux files.
-              build = { onSave = false },
-              chktex = { onOpenAndSave = true, onEdit = false },
-              diagnosticsDelay = 300,
-            },
-          },
-        },
         lua_ls = {
           settings = {
             Lua = {

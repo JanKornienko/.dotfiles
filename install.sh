@@ -88,36 +88,6 @@ else
   # the prompt renders as tofu boxes — set the font in iTerm/Terminal after this.
   brew install -q --cask font-meslo-lg-nerd-font || true
 
-  # ---------------------------------------------------------------- LaTeX
-  # Thesis toolchain. The texlive formula rather than the mactex cask: same
-  # full distribution, but it is bottled into the brew prefix, so the bootstrap
-  # never stops on a sudo password prompt. Several GB, hence the guard.
-  if ! have latexmk; then
-    log "TeX Live — several GB, go get a coffee"
-    brew install -q texlive || true
-  fi
-  # biber is not part of the texlive bottle, and biblatex bibliographies —
-  # what the thesis uses — do not build without it.
-  brew install -q biber || true
-  # nvim-treesitter (master) generates some parsers from grammar definitions
-  # rather than shipping them prebuilt, and needs this CLI to do it.
-  brew install -q tree-sitter-cli || true
-  # Skim, not Preview: it reloads the PDF on every rebuild and speaks SyncTeX.
-  brew install -q --cask skim || true
-
-  # Inverse search: Cmd-Shift-click in the PDF jumps Neovim to that source line.
-  # Skim launches this command itself, outside the login shell, so the absolute
-  # path matters — $PATH there does not contain Homebrew.
-  if [ -d /Applications/Skim.app ]; then
-    NVIM_BIN="$(command -v nvim || echo /opt/homebrew/bin/nvim)"
-    defaults write net.sourceforge.skim-app.skim SKTeXEditorPreset -string "Custom"
-    defaults write net.sourceforge.skim-app.skim SKTeXEditorCommand -string "$NVIM_BIN"
-    defaults write net.sourceforge.skim-app.skim SKTeXEditorArguments \
-      -string "--headless -c \"VimtexInverseSearch %line '%file'\""
-    # Reload the file on disk without asking, so recompiles land in the window.
-    defaults write net.sourceforge.skim-app.skim SKAutoReloadFileUpdate -bool true
-    defaults write net.sourceforge.skim-app.skim SKAutoCheckFileUpdate -bool true
-  fi
 fi
 
 # ---------------------------------------------------------------- binaries (linux only)
