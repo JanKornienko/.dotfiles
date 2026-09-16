@@ -15,7 +15,6 @@ local state = {
   win = nil,
   buf = nil,
   image = nil,
-  slot = "a",
   png = nil,
   pdf = nil,
   stamp = nil,
@@ -69,36 +68,30 @@ local function page_geometry(pdf)
   return pages, aspect
 end
 
--- The file name carries the PDF's mtime because image.nvim caches by path: a
--- rebuilt page written back to the same name would keep showing the old image.
+-- Always the same file. image.nvim keys its cache on the path and re-reads the
+-- file when its mtime moves (Image:render), so overwriting one path in place
+-- is the supported way to change what is displayed. Naming each generation
+-- separately instead would leak a new image object per rebuild, because
+-- from_file returns the cached image for a known id and ignores the new path.
+local function png_path()
+  return cache_dir .. "/current.png"
+end
+
 local function rasterize(pdf, page)
   vim.fn.mkdir(cache_dir, "p")
-  local stamp = vim.fn.getftime(pdf)
-  local key = vim.fn.sha256(pdf):sub(1, 16)
-  local prefix = string.format("%s/%s-%d-%d", cache_dir, key, stamp, page)
-  local png = prefix .. ".png"
+  local png = png_path()
+  local prefix = png:gsub("%.png$", "")
 
-  -- Every rebuild starts a new generation of page images. Without this the
-  -- cache would keep one PNG per page per compile, which over a thesis is
-  -- thousands of files nobody will ever look at again.
-  for _, stale in ipairs(vim.fn.glob(cache_dir .. "/" .. key .. "-*.png", false, true)) do
-    if not stale:match("^" .. vim.pesc(cache_dir .. "/" .. key .. "-" .. stamp .. "-")) then
-      vim.fn.delete(stale)
-    end
-  end
-
-  if vim.fn.filereadable(png) == 0 then
-    -- -singlefile keeps the name predictable; without it pdftoppm appends a
-    -- zero-padded page number whose width depends on the page count.
-    local out = vim.fn.system({
-      "pdftoppm", "-png", "-singlefile",
-      "-r", tostring(DPI),
-      "-f", tostring(page), "-l", tostring(page),
-      pdf, prefix,
-    })
-    if vim.v.shell_error ~= 0 then
-      return nil, "pdftoppm failed: " .. out
-    end
+  -- -singlefile keeps the name predictable; without it pdftoppm appends a
+  -- zero-padded page number whose width depends on the page count.
+  local out = vim.fn.system({
+    "pdftoppm", "-png", "-singlefile",
+    "-r", tostring(DPI),
+    "-f", tostring(page), "-l", tostring(page),
+    pdf, prefix,
+  })
+  if vim.v.shell_error ~= 0 then
+    return nil, "pdftoppm failed: " .. out
   end
   return png
 end
@@ -140,34 +133,33 @@ local function draw()
     return notify("image.nvim is not available")
   end
 
-  -- Two alternating ids so the new page can be put on screen before the old
-  -- one is taken off. Clearing first leaves the window blank for a frame,
-  -- which during continuous compilation reads as a constant blink.
-  local previous = state.image
-  state.slot = state.slot == "a" and "b" or "a"
-
-  local img = image.from_file(state.png, {
-    id = "latex-preview-" .. state.slot,
-    window = state.win,
-    buffer = state.buf,
-    x = 0,
-    y = 0,
-    -- Both percentages have to be given: the plugin caps images at half the
-    -- window height by default (lua/image/init.lua).
-    max_width_window_percentage = 100,
-    max_height_window_percentage = 100,
-  })
-  if not img then
-    return notify("could not build the image")
+  if not state.image then
+    -- A fresh id per session: ids are never released (Image:clear leaves
+    -- state.images alone), so reusing one across windows would hand back an
+    -- image still pointing at the closed window.
+    state.image = image.from_file(state.png, {
+      id = "latex-preview-" .. vim.loop.hrtime(),
+      window = state.win,
+      buffer = state.buf,
+      x = 0,
+      y = 0,
+      -- Both percentages have to be given: the plugin caps images at half the
+      -- window height by default (lua/image/init.lua).
+      max_width_window_percentage = 100,
+      max_height_window_percentage = 100,
+    })
+    if not state.image then
+      return notify("could not build the image")
+    end
+  else
+    -- render() only re-reads the file when getftime reports a newer mtime, and
+    -- that has one-second granularity — two page turns inside the same second
+    -- would show the first page twice. Forcing the timestamp makes every draw
+    -- re-read what pdftoppm just wrote.
+    state.image.last_modified = -1
   end
 
-  img:render()
-  state.image = img
-  if previous then
-    pcall(function()
-      previous:clear()
-    end)
-  end
+  state.image:render()
 
   if state.buf and vim.api.nvim_buf_is_valid(state.buf) then
     vim.api.nvim_buf_set_name(state.buf, string.format("PDF %d/%d", state.page, state.pages))
