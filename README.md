@@ -130,9 +130,21 @@ Hand-rolled config (no distro) on `lazy.nvim`. Web-first: TypeScript, JavaScript
 
 ### 📄 LaTeX (thesis writing)
 
-Neovim on the left, [Skim](https://skim-app.sourceforge.io/) on the right. VimTeX
-keeps `latexmk` running in continuous mode, so the PDF updates a second or two
-after you stop typing — no manual rebuild.
+VimTeX keeps `latexmk` running in continuous mode, so the PDF updates a second
+or two after you stop typing — no manual rebuild.
+
+Two ways to look at it, because neither does the other's job:
+
+- `\lp` splits the tmux window and draws the pages there with
+  [tdf](https://github.com/itsjunetime/tdf), so everything stays in the
+  terminal. It reloads itself whenever latexmk writes a new PDF.
+- `\lv` uses [Skim](https://skim-app.sourceforge.io/), the only one of the two
+  that speaks SyncTeX and can therefore jump between a source line and its
+  place on the page.
+
+The PDF cannot go in a Neovim split: `:terminal` runs on libvterm, which drops
+the kitty graphics escape sequences a terminal PDF viewer needs. iTerm2 and
+tmux both pass them through, hence the tmux pane.
 
 Prose is written in Czech: `cs` + `en_us` spell checking is on in every `.tex`
 buffer, the Czech dictionary is vendored in `.config/nvim/spell/`, and words
@@ -141,6 +153,7 @@ added with `zg` land in `spell/cs.utf-8.add` so they sync with the repo.
 **Local leader:** `\` — all LaTeX maps hang off `\l`
 
 - `\ll` - Start/stop continuous compilation
+- `\lp` - Toggle the PDF pane beside the editor (tmux + tdf)
 - `\lv` - Forward search: move Skim to the cursor line
 - `⌘⇧-click` in Skim - Inverse search: move Neovim to the clicked line
 - `\lt` - Table of contents · `\le` - Errors · `\lw` - Word count
@@ -152,8 +165,8 @@ in the thesis repo. `texlab` supplies `\cite`/`\ref` completion and `chktex`
 diagnostics; it does not build — VimTeX does.
 
 **Installed by `install.sh` (macOS):** `texlive` (full distribution, latexmk +
-biber), `skim` cask, and the Skim SyncTeX preferences wiring inverse search to
-`nvim`.
+biber), `tdf`, the `skim` cask, and the Skim SyncTeX preferences wiring inverse
+search to `nvim`.
 
 ## 📦 Installation
 

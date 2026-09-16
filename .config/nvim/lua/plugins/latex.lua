@@ -1,10 +1,75 @@
--- LaTeX: VimTeX drives latexmk, Skim shows the PDF next to the editor.
+-- LaTeX: VimTeX drives latexmk, the PDF shows up next to the editor.
+--
+-- Two viewers, because neither does the other's job:
+--   \lp  tdf in a tmux pane — stays in the terminal, reloads on every rebuild
+--   \lv  Skim — the only one that speaks SyncTeX, so the only one that can
+--        jump between a source line and its place on the page
+-- The PDF cannot live in a Neovim split: :terminal runs on libvterm, which
+-- drops the kitty graphics escapes that any terminal PDF viewer needs.
 --
 -- Why VimTeX and not the texlab build: texlab rebuilds on save only, VimTeX
 -- keeps latexmk running in continuous mode, so the PDF refreshes while typing.
 -- texlab is still enabled (see lsp.lua) for \cite/\ref completion and chktex.
 --
 -- Written in Czech, so spell checking, hyphenation and conceal all assume cs.
+
+-- Path of the PDF latexmk produces for the current document. VimTeX knows it
+-- (it accounts for out_dir), but only through a Vimscript funcref.
+local function pdf_path()
+  if not vim.b.vimtex then
+    return nil, "not a VimTeX buffer"
+  end
+  local ok, path = pcall(vim.fn.eval, 'b:vimtex.compiler.get_file("pdf")')
+  if not ok or type(path) ~= "string" then
+    return nil, "could not work out the PDF path"
+  end
+  return path
+end
+
+-- Pane id of a tdf already running in this tmux window, if any.
+local function tdf_pane()
+  local panes = vim.fn.systemlist({ "tmux", "list-panes", "-F", "#{pane_id} #{pane_current_command}" })
+  if vim.v.shell_error ~= 0 then
+    return nil
+  end
+  for _, line in ipairs(panes) do
+    local id, cmd = line:match("^(%%%d+)%s+(%S+)$")
+    if cmd == "tdf" then
+      return id
+    end
+  end
+  return nil
+end
+
+-- Toggle the PDF pane beside the editor. Opening does not steal focus (-d),
+-- so compile, preview and typing never interrupt each other.
+local function toggle_preview()
+  local warn = function(msg)
+    vim.notify(msg, vim.log.levels.WARN, { title = "LaTeX preview" })
+  end
+
+  if not vim.env.TMUX then
+    return warn("Not inside tmux — use \\lv to open the PDF in Skim instead.")
+  end
+
+  local existing = tdf_pane()
+  if existing then
+    vim.system({ "tmux", "kill-pane", "-t", existing })
+    return
+  end
+
+  local pdf, err = pdf_path()
+  if not pdf then
+    return warn(err)
+  end
+  if vim.fn.filereadable(pdf) == 0 then
+    return warn("No PDF yet — start the compiler with \\ll first.")
+  end
+
+  -- tmux joins the trailing arguments into one shell command, so the path is
+  -- escaped here rather than passed as a separate argv entry.
+  vim.system({ "tmux", "split-window", "-h", "-l", "50%", "-d", "tdf " .. vim.fn.shellescape(pdf) })
+end
 
 local function tex_buffer_setup()
   local opt = vim.opt_local
@@ -114,7 +179,8 @@ return {
     end,
     keys = {
       { "<localleader>ll", "<cmd>VimtexCompile<cr>", ft = "tex", desc = "LaTeX: toggle continuous compile" },
-      { "<localleader>lv", "<cmd>VimtexView<cr>", ft = "tex", desc = "LaTeX: forward search to cursor" },
+      { "<localleader>lv", "<cmd>VimtexView<cr>", ft = "tex", desc = "LaTeX: forward search to cursor (Skim)" },
+      { "<localleader>lp", toggle_preview, ft = "tex", desc = "LaTeX: toggle PDF pane (tmux + tdf)" },
       { "<localleader>lt", "<cmd>VimtexTocToggle<cr>", ft = "tex", desc = "LaTeX: table of contents" },
       { "<localleader>le", "<cmd>VimtexErrors<cr>", ft = "tex", desc = "LaTeX: errors" },
       { "<localleader>lc", "<cmd>VimtexClean<cr>", ft = "tex", desc = "LaTeX: clean aux files" },

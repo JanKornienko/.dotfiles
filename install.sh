@@ -102,7 +102,11 @@ else
   # nvim-treesitter (master) generates some parsers from grammar definitions
   # rather than shipping them prebuilt, and needs this CLI to do it.
   brew install -q tree-sitter-cli || true
-  # Skim, not Preview: it reloads the PDF on every rebuild and speaks SyncTeX.
+  # Two PDF viewers, because neither covers the other's case: tdf draws the
+  # pages in a tmux pane over the kitty graphics protocol (which iTerm2 speaks,
+  # and which Neovim's own :terminal does not), while Skim is the only one that
+  # can jump between a source line and its place on the page via SyncTeX.
+  brew install -q tdf || true
   brew install -q --cask skim || true
 
   # Inverse search: Cmd-Shift-click in the PDF jumps Neovim to that source line.
