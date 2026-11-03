@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Claude Code statusline — sci-fi HUD, ASCII + ANSI 256-color
-# Layout:  <<ctx:23%>> :: main :: [5h:41% | wk:12%]
+# Layout:  <<ctx:23%>> :: main :: [5h:41% | wk:12%] :: ram:62% dsk:81%
 
 C_RESET='\033[0m'
 C_SEP='\033[38;5;245m'      # gruvbox gray   (#928374)
@@ -53,6 +53,34 @@ fmt_pct() {
   [ -n "$rstr" ] && printf " ${C_SEP}↻%s${C_RESET}" "$rstr"
 }
 
+# --- host metrics -----------------------------------------------------------
+
+ram_usage() {
+  # macOS: used = active + wired + compressed, over hw.memsize
+  local total page stats used
+  total=$(sysctl -n hw.memsize 2>/dev/null) || return
+  [ -n "$total" ] || return
+  stats=$(vm_stat 2>/dev/null) || return
+  page=$(echo "$stats" | awk 'NR==1{for(i=1;i<=NF;i++) if($i=="size"){print $(i+2); exit}}')
+  [ -n "$page" ] || page=4096
+  used=$(echo "$stats" | awk -v pg="$page" -v tot="$total" '
+    /^Pages active/      {a=$3}
+    /^Pages wired down/  {w=$4}
+    /^Pages occupied by compressor/ {c=$5}
+    END {
+      gsub(/\./,"",a); gsub(/\./,"",w); gsub(/\./,"",c)
+      if (tot <= 0) exit
+      printf "%.0f", (a+w+c)*pg*100/tot
+    }')
+  echo "$used"
+}
+
+disk_usage() {
+  local vol=/System/Volumes/Data
+  [ -d "$vol" ] || vol=/
+  df -Pk "$vol" 2>/dev/null | awk 'NR==2{gsub(/%/,"",$5); print $5}'
+}
+
 ctx_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty' 2>/dev/null)
 five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty' 2>/dev/null)
 week_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty' 2>/dev/null)
@@ -61,6 +89,9 @@ week_reset=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // .rate_li
 
 model=$(echo "$input" | jq -r '.model.display_name // empty' 2>/dev/null | sed 's/ (.*//; s/Claude //I' | tr '[:upper:]' '[:lower:]')
 effort=$(echo "$input" | jq -r '.effort.level // empty' 2>/dev/null)
+
+ram_pct=$(ram_usage)
+dsk_pct=$(disk_usage)
 
 cwd=$(echo "$input" | jq -r '.cwd // .workspace.current_dir // empty' 2>/dev/null)
 branch=""
@@ -82,5 +113,15 @@ fi
 five_str=$(fmt_pct "5h:" "$five_pct" "$five_reset")
 week_str=$(fmt_pct "wk:" "$week_pct" "$week_reset")
 out="${out}  ${C_SEP}[${C_RESET}${five_str}  ${C_SEP}|${C_RESET}  ${week_str}${C_SEP}]${C_RESET}"
+
+if [ -n "$ram_pct" ] || [ -n "$dsk_pct" ]; then
+  host_str=""
+  [ -n "$ram_pct" ] && host_str=$(fmt_pct "ram:" "$ram_pct")
+  if [ -n "$dsk_pct" ]; then
+    [ -n "$host_str" ] && host_str="${host_str}  "
+    host_str="${host_str}$(fmt_pct "dsk:" "$dsk_pct")"
+  fi
+  out="${out}  ${C_SEP}::${C_RESET}  ${host_str}"
+fi
 
 printf '%b\n' "$out"
