@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Claude Code statusline — sci-fi HUD, ASCII + ANSI 256-color
-# Layout:  <<ctx:23%>> :: main :: [5h:41% | wk:12%] :: ram:62% dsk:81%
+# Layout:  <<ctx:23%>> :: main :: [5h:41% | wk:12%] :: ram:45% dsk:81%
 
 C_RESET='\033[0m'
 C_SEP='\033[38;5;245m'      # gruvbox gray   (#928374)
@@ -56,23 +56,30 @@ fmt_pct() {
 # --- host metrics -----------------------------------------------------------
 
 ram_usage() {
-  # macOS: used = active + wired + compressed, over hw.memsize
-  local total page stats used
+  # Memory pressure, as Activity Monitor shows it:
+  # 100 - the kernel's own system-wide free percentage.
+  local free pct
+  free=$(memory_pressure 2>/dev/null \
+    | awk '/System-wide memory free percentage/{gsub(/%/,"",$NF); print $NF; exit}')
+  if echo "$free" | grep -qE '^[0-9]+(\.[0-9]+)?$'; then
+    printf '%.0f' "$(echo "$free" | awk '{print 100 - $1}')"
+    return
+  fi
+  # Fallback: (wired + compressed) / total, the same quantity by hand.
+  local total stats page
   total=$(sysctl -n hw.memsize 2>/dev/null) || return
   [ -n "$total" ] || return
   stats=$(vm_stat 2>/dev/null) || return
   page=$(echo "$stats" | awk 'NR==1{for(i=1;i<=NF;i++) if($i=="size"){print $(i+2); exit}}')
   [ -n "$page" ] || page=4096
-  used=$(echo "$stats" | awk -v pg="$page" -v tot="$total" '
-    /^Pages active/      {a=$3}
+  echo "$stats" | awk -v pg="$page" -v tot="$total" '
     /^Pages wired down/  {w=$4}
     /^Pages occupied by compressor/ {c=$5}
     END {
-      gsub(/\./,"",a); gsub(/\./,"",w); gsub(/\./,"",c)
+      gsub(/\./,"",w); gsub(/\./,"",c)
       if (tot <= 0) exit
-      printf "%.0f", (a+w+c)*pg*100/tot
-    }')
-  echo "$used"
+      printf "%.0f", (w+c)*pg*100/tot
+    }'
 }
 
 disk_usage() {
